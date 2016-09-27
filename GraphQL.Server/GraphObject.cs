@@ -11,6 +11,7 @@ namespace GraphQL.Server
             Container = container;
             Name = typeof(T).Name;
             if (container != null) FieldMapper.AddAllFields(Container, this, GetType(), true);
+            IsTypeOf = o => o is T;
         }
     }
 }

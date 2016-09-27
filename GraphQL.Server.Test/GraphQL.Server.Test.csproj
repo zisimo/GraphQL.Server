@@ -35,8 +35,8 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GraphQL, Version=0.11.0.493, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\GraphQL.0.11.0.493\lib\net45\GraphQL.dll</HintPath>
+    <Reference Include="GraphQL, Version=0.11.0.539, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GraphQL.0.11.0.539\lib\net45\GraphQL.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -52,6 +52,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>

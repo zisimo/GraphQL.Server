@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -29,16 +30,6 @@ namespace GraphQL.Server
                 if (_resourceTypes == null)
                 {
                     _resourceTypes = new Dictionary<string, Type>();
-                    //Load GraphTypes
-                    foreach (var assembly in Assemblies)
-                    {
-                        var types = assembly.Value.ExportedTypes.Where(t => typeof(GraphType).IsAssignableFrom(t) && !ExcludedTypes.Contains(t)).ToDictionary(t => t.Name, t => t);
-                        foreach (var type in types)
-                        {
-                            if (ResourceTypes.ContainsKey(type.Key)) continue;
-                            ResourceTypes.Add(type.Key, type.Value);
-                        }
-                    }
                 }
                 return _resourceTypes;
             }
@@ -106,7 +97,13 @@ namespace GraphQL.Server
         public static void LoadTypes(Assembly assembly)
         {
             Assemblies[assembly.FullName] = assembly;
-            var tmpTypes = ResourceTypes;
+            var types = assembly.ExportedTypes.Where(t => typeof(GraphType).IsAssignableFrom(t) && !ExcludedTypes.Contains(t)).ToDictionary(t => t.Name, t => t);
+            foreach (var type in types)
+            {
+                if (ResourceTypes.ContainsKey(type.Key)) continue;
+                ResourceTypes.Add(type.Key, type.Value);
+            }
+            //var tmpTypes = ResourceTypes;
         }
 
         public static void LoadOperations(IContainer container, Assembly assembly, ApiSchema schema)
@@ -116,6 +113,24 @@ namespace GraphQL.Server
             {
                 var operation = (IOperation) container.GetInstance(type.Value);
                 operation.Register(schema);
+            }
+        }
+
+        public static void InitializeTypes(IContainer container)
+        {
+            foreach (var type in ResourceTypes)
+            {
+                //var constructors = type.Value.GetConstructors();
+                //if (constructors.Any(c => c.GetParameters().Length == 1 && ))
+                var baseType = type.Value.BaseType.GetGenericTypeDefinition();
+                if (baseType == typeof(GraphObject<>) || baseType == typeof(GraphInterface<>))
+                {
+                    Activator.CreateInstance(type.Value, container);
+                }
+                else
+                {
+                    Activator.CreateInstance(type.Value);
+                }
             }
         }
     }

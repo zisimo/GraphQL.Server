@@ -12,6 +12,7 @@ namespace GraphQL.Server.Test.Objects
 
         public DroidObject(IContainer container) : base(container)
         {
+            Interface<ICharacterInterface>();
         }
     }
 }

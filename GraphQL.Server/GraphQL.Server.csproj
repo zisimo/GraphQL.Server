@@ -35,8 +35,8 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GraphQL, Version=0.11.0.493, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\GraphQL.0.11.0.493\lib\net45\GraphQL.dll</HintPath>
+    <Reference Include="GraphQL, Version=0.11.0.539, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GraphQL.0.11.0.539\lib\net45\GraphQL.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -89,7 +89,6 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

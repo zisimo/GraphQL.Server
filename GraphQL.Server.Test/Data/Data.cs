@@ -61,5 +61,21 @@ namespace GraphQL.Server.Test.Data
         {
             return _droids.FirstOrDefault(d => d.Id == id);
         }
+
+        public ICharacter GetHero(int? id)
+        {
+            ICharacter hero = _humans.FirstOrDefault(h => h.Id == id);
+            if (hero == null) hero = _droids.FirstOrDefault(d => d.Id == id);
+            return hero;
+        }
+
+        public ICharacter[] SearchHeroes(string text)
+        {
+            text = text.ToLower();
+            var friends = new List<ICharacter>();
+            friends.AddRange(_humans.Where(h => h.Name.ToLower().Contains(text)));
+            friends.AddRange(_droids.Where(d => d.Name.ToLower().Contains(text)));
+            return friends.ToArray();
+        }
     }
 }

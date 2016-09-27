@@ -12,6 +12,7 @@ namespace GraphQL.Server.Test.Objects
 
         public HumanObject(IContainer container) : base(container)
         {
+            Interface<ICharacterInterface>();
         }
     }
 }

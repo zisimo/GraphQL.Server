@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using GraphQL.Language;
 using GraphQL.Language.AST;
 using GraphQL.Types;
 
@@ -20,7 +19,7 @@ namespace GraphQL.Server
         {
             return ValidateField(typeof(T), errors, args, astArgs, context, field);
         }
-        public static ValidationError ValidateField(Type fieldType, List<ValidationError> errors, Dictionary<string, QueryArgument> args, Dictionary<string, Argument> astArgs, ResolveFieldContext context, string field)
+        public static ValidationError ValidateField(Type fieldType, List<ValidationError> errors, Dictionary<string, QueryArgument> args, Dictionary<string, Argument> astArgs, ResolveFieldContext<object> context, string field)
         {
             ValidationError error = null;
             if (args.ContainsKey(field))

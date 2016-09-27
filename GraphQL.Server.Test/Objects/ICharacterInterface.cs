@@ -11,7 +11,8 @@ namespace GraphQL.Server.Test.Objects
 
         public ICharacterInterface(IContainer container) : base(container)
         {
-            
+            AddType<HumanObject>();
+            AddType<DroidObject>();
         }
 
         public ICharacter[] GetFriends(Human human)

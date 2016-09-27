@@ -10,7 +10,7 @@ namespace GraphQL.Server
 {
     public class FieldMapper
     {
-        public static void AddAllFields(IContainer container, GraphType obj, Type type, bool declaredPropertiesOnly)
+        public static void AddAllFields(IContainer container, ComplexGraphType<Object> obj, Type type, bool declaredPropertiesOnly)
         {
             var filter = BindingFlags.Instance | BindingFlags.Public;
             if (declaredPropertiesOnly) filter = filter | BindingFlags.DeclaredOnly;
@@ -24,7 +24,7 @@ namespace GraphQL.Server
             }
         }
 
-        public static void AddField(IContainer container, GraphType obj, Type type, PropertyInfo propertyInfo, MethodInfo methodInfo)
+        public static void AddField(IContainer container, ComplexGraphType<Object> obj, Type type, PropertyInfo propertyInfo, MethodInfo methodInfo)
         {
             if (propertyInfo.PropertyType == typeof(IContainer)) return;
             var fieldType = propertyInfo.PropertyType;
@@ -32,7 +32,7 @@ namespace GraphQL.Server
             var fieldDescription = "";
             var authFieldName = $"{type.FullName}.{propertyInfo.Name}";
 
-            Func<ResolveFieldContext, object> contextResolve;
+            Func<ResolveFieldContext<object>, object> contextResolve;
             if (methodInfo != null)
             {
                 // Custom mapping of property
@@ -72,7 +72,7 @@ namespace GraphQL.Server
             }
         }
 
-        private static object[] GetArgumentsForMethod(MethodInfo methodInfo, IContainer container, ResolveFieldContext context)
+        private static object[] GetArgumentsForMethod(MethodInfo methodInfo, IContainer container, ResolveFieldContext<object> context)
         {
             var arguments = new List<object>();
             var sourceType = context.Source.GetType();
