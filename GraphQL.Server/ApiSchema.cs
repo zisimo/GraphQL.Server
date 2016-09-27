@@ -14,7 +14,8 @@ namespace GraphQL.Server
             base.Mutation = Mutation = new ApiOperation(container, "Mutation");
             foreach (var assembly in assemblies)
             {
-                TypeLoader.LoadAssembly(assembly);
+                TypeLoader.LoadTypes(assembly);
+                TypeLoader.LoadOperations(container, assembly, this);
             }
         }
     }

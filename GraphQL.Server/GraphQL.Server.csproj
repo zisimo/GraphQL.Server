@@ -53,10 +53,12 @@
     <Compile Include="ApiOperation.cs" />
     <Compile Include="ApiSchema.cs" />
     <Compile Include="EmptyInput.cs" />
+    <Compile Include="Exceptions\NotFoundException.cs" />
     <Compile Include="Exceptions\GraphException.cs" />
     <Compile Include="Exceptions\ValidationException.cs" />
     <Compile Include="FieldMapper.cs" />
     <Compile Include="GraphArguments.cs" />
+    <Compile Include="IOperation.cs" />
     <Compile Include="Types\GraphEnum.cs" />
     <Compile Include="GraphInputObject.cs" />
     <Compile Include="GraphInterface.cs" />

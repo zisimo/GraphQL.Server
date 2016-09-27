@@ -4,7 +4,7 @@ namespace GraphQL.Server
 {
     public interface IContainer
     {
-        T GetInstance<T>();
+        T GetInstance<T>() where T : class;
         object GetInstance(Type type);
     }
 }

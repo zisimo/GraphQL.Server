@@ -26,6 +26,7 @@ namespace GraphQL.Server
 
         public static void AddField(IContainer container, GraphType obj, Type type, PropertyInfo propertyInfo, MethodInfo methodInfo)
         {
+            if (propertyInfo.PropertyType == typeof(IContainer)) return;
             var fieldType = propertyInfo.PropertyType;
             var fieldName = StringExtensions.PascalCase(propertyInfo.Name);
             var fieldDescription = "";

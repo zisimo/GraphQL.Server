@@ -21,7 +21,7 @@ namespace GraphQL.Server
             }
         }
 
-        public static Type[] ExcludedTypes = new [] { typeof(GraphInputObject<>), typeof(GraphObject<>) };
+        public static Type[] ExcludedTypes = new [] { typeof(GraphInputObject<>), typeof(GraphObject<>), typeof(IContainer) };
         public static Dictionary<string, Type> ResourceTypes
         {
             get
@@ -103,10 +103,20 @@ namespace GraphQL.Server
             return type.GenericTypeArguments[0];
         }
 
-        public static void LoadAssembly(Assembly assembly)
+        public static void LoadTypes(Assembly assembly)
         {
             Assemblies[assembly.FullName] = assembly;
-            var types = ResourceTypes;
+            var tmpTypes = ResourceTypes;
+        }
+
+        public static void LoadOperations(IContainer container, Assembly assembly, ApiSchema schema)
+        {
+            var types = assembly.ExportedTypes.Where(t => typeof(IOperation).IsAssignableFrom(t)).ToDictionary(t => t.Name, t => t);
+            foreach (var type in types)
+            {
+                var operation = (IOperation) container.GetInstance(type.Value);
+                operation.Register(schema);
+            }
         }
     }
 }
