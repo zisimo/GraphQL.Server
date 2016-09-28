@@ -3,18 +3,46 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphQL.Server", "GraphQL.Server\GraphQL.Server.csproj", "{4BAE5451-1FD2-4514-B5C4-0663E5D7D967}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphQL.Server.Test", "GraphQL.Server.Test\GraphQL.Server.Test.csproj", "{C9A99D5E-6E4E-440B-9096-9A77C4456022}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphQL.Server.SimpleInjector", "GraphQL.Server.SimpleInjector\GraphQL.Server.SimpleInjector.csproj", "{DB35689A-A503-49A7-BEA2-E28DA002AE4B}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ProjectFiles", "ProjectFiles", "{0B8CC7C2-16D1-4D48-87AB-A3DECB2E937F}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Files", "Files", "{0B8CC7C2-16D1-4D48-87AB-A3DECB2E937F}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{6E39D822-E768-434E-AB95-6391333D6808}"
+	ProjectSection(SolutionItems) = preProject
+		tools\build.js = tools\build.js
+		tools\make.js = tools\make.js
+		tools\runTasks.js = tools\runTasks.js
+		tools\toTasks.js = tools\toTasks.js
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tasks", "tasks", "{C7B97770-050D-4762-BD10-24FE48DC37F0}"
+	ProjectSection(SolutionItems) = preProject
+		tools\tasks\appVeyorResults.js = tools\tasks\appVeyorResults.js
+		tools\tasks\appVeyorVersion.js = tools\tasks\appVeyorVersion.js
+		tools\tasks\artifacts.js = tools\tasks\artifacts.js
+		tools\tasks\compile.js = tools\tasks\compile.js
+		tools\tasks\Deferred.js = tools\tasks\Deferred.js
+		tools\tasks\dotnetPack.js = tools\tasks\dotnetPack.js
+		tools\tasks\index.js = tools\tasks\index.js
+		tools\tasks\nuget.js = tools\tasks\nuget.js
+		tools\tasks\nuspec.js = tools\tasks\nuspec.js
+		tools\tasks\restore.js = tools\tasks\restore.js
+		tools\tasks\settings.js = tools\tasks\settings.js
+		tools\tasks\setVersion.js = tools\tasks\setVersion.js
+		tools\tasks\test.dotnet.js = tools\tasks\test.dotnet.js
+		tools\tasks\test.fixie.js = tools\tasks\test.fixie.js
+		tools\tasks\updateFile.js = tools\tasks\updateFile.js
+		tools\tasks\version.js = tools\tasks\version.js
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphQL.Server", "src\GraphQL.Server\GraphQL.Server.csproj", "{4BAE5451-1FD2-4514-B5C4-0663E5D7D967}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphQL.Server.SimpleInjector", "src\GraphQL.Server.SimpleInjector\GraphQL.Server.SimpleInjector.csproj", "{DB35689A-A503-49A7-BEA2-E28DA002AE4B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphQL.Server.Test", "src\GraphQL.Server.Test\GraphQL.Server.Test.csproj", "{C9A99D5E-6E4E-440B-9096-9A77C4456022}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,16 +54,20 @@ Global
 		{4BAE5451-1FD2-4514-B5C4-0663E5D7D967}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4BAE5451-1FD2-4514-B5C4-0663E5D7D967}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4BAE5451-1FD2-4514-B5C4-0663E5D7D967}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C9A99D5E-6E4E-440B-9096-9A77C4456022}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C9A99D5E-6E4E-440B-9096-9A77C4456022}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C9A99D5E-6E4E-440B-9096-9A77C4456022}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C9A99D5E-6E4E-440B-9096-9A77C4456022}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DB35689A-A503-49A7-BEA2-E28DA002AE4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DB35689A-A503-49A7-BEA2-E28DA002AE4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB35689A-A503-49A7-BEA2-E28DA002AE4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DB35689A-A503-49A7-BEA2-E28DA002AE4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9A99D5E-6E4E-440B-9096-9A77C4456022}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9A99D5E-6E4E-440B-9096-9A77C4456022}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9A99D5E-6E4E-440B-9096-9A77C4456022}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9A99D5E-6E4E-440B-9096-9A77C4456022}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6E39D822-E768-434E-AB95-6391333D6808} = {0B8CC7C2-16D1-4D48-87AB-A3DECB2E937F}
+		{C7B97770-050D-4762-BD10-24FE48DC37F0} = {6E39D822-E768-434E-AB95-6391333D6808}
 	EndGlobalSection
 EndGlobal
