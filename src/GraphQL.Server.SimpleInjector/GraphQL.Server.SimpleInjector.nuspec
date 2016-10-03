@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>GraphQL.Server.SimpleInjector</id>
-    <version>0.0.1-alpha</version>
+    <version>0.0.2-alpha</version>
     <title>GraphQL.Server.SimpleInjector</title>
     <authors>LobsterInk</authors>
     <owners>LobsterInk</owners>
@@ -13,7 +13,7 @@
     <releaseNotes></releaseNotes>
     <copyright>Copyright LobsterInk 2016</copyright>
     <dependencies>
-      <dependency id="GraphQL.Server" version="0.0.1-alpha" />
+      <dependency id="GraphQL.Server" version="0.0.2-alpha" />
     </dependencies>
   </metadata>
 </package>

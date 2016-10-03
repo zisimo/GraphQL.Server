@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>GraphQL.Server</id>
-    <version>0.0.1-alpha</version>
+    <version>0.0.2-alpha</version>
     <title>GraphQL.Server</title>
     <authors>LobsterInk</authors>
     <owners>LobsterInk</owners>
@@ -16,10 +16,14 @@
       <dependency id="Newtonsoft.Json" version="9.0.1" />
     </dependencies>
     <references>
-      <reference file="GraphQL.dll" />
+      <group>
+        <reference file="GraphQL.dll" />
+        <reference file="GraphQL.Server.dll" />
+      </group>
     </references>
   </metadata>
   <files>
-    <file src="bin\Release\GraphQL.dll" target="lib"/>
+    <file src="bin\Release\GraphQL.dll" target="lib\net45"/>
+    <file src="bin\Release\GraphQL.Server.dll" target="lib\net45"/>
   </files>
 </package>
