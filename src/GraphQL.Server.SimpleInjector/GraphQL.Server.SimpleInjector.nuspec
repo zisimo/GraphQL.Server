@@ -1,25 +1,19 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>GraphQL.Server</id>
+    <id>GraphQL.Server.SimpleInjector</id>
     <version>0.0.1-alpha</version>
-    <title>GraphQL.Server</title>
+    <title>GraphQL.Server.SimpleInjector</title>
     <authors>LobsterInk</authors>
     <owners>LobsterInk</owners>
     <licenseUrl>https://github.com/LobsterInk/GraphQL.Server/blob/dev/LICENSE</licenseUrl>
     <projectUrl>https://github.com/LobsterInk/GraphQL.Server</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>GraphQL Server components</description>
+    <description>GraphQL Server SimpleInjector support</description>
     <releaseNotes></releaseNotes>
     <copyright>Copyright LobsterInk 2016</copyright>
     <dependencies>
-      <dependency id="Newtonsoft.Json" version="9.0.1" />
+      <dependency id="GraphQL.Server" version="0.0.1-alpha" />
     </dependencies>
-    <references>
-      <reference file="GraphQL.dll" />
-    </references>
   </metadata>
-  <files>
-    <file src="bin\Release\GraphQL.dll" target="lib"/>
-  </files>
 </package>

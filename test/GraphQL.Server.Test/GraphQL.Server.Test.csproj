@@ -68,6 +68,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\GraphQL.Server.Sample\GraphQL.Server.Sample.csproj">
+      <Project>{5f12f18b-4c7b-434c-a083-8bb9cf78b3bb}</Project>
+      <Name>GraphQL.Server.Sample</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\GraphQL.Server.SimpleInjector\GraphQL.Server.SimpleInjector.csproj">
       <Project>{db35689a-a503-49a7-bea2-e28da002ae4b}</Project>
       <Name>GraphQL.Server.SimpleInjector</Name>
