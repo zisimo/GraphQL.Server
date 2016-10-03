@@ -12,7 +12,11 @@ namespace GraphQL.Server
             Container = container;
             Name = typeof(T).Name;
             if (container != null) FieldMapper.AddAllFields(Container, this, GetType(), true);
-            ResolveType = o => (ObjectGraphType)Activator.CreateInstance(TypeLoader.GetGraphType(o.GetType()), Container);
+            ResolveType = o =>
+            {
+                if (o is T) return (ObjectGraphType) Activator.CreateInstance(TypeLoader.GetGraphType(o.GetType()), Container);
+                return null;
+            };
         }
 
         protected void AddType<T>() where T : ObjectGraphType
