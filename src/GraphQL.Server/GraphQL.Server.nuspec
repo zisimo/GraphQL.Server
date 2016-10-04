@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>GraphQL.Server</id>
+    <version>0.0.2-alpha</version>
+    <title>GraphQL.Server</title>
+    <authors>LobsterInk</authors>
+    <owners>LobsterInk</owners>
+    <licenseUrl>https://github.com/LobsterInk/GraphQL.Server/blob/dev/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/LobsterInk/GraphQL.Server</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>GraphQL Server components</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright LobsterInk 2016</copyright>
+    <dependencies>
+      <dependency id="Newtonsoft.Json" version="9.0.1" />
+    </dependencies>
+    <references>
+      <group>
+        <reference file="GraphQL.dll" />
+        <reference file="GraphQL.Server.dll" />
+      </group>
+    </references>
+  </metadata>
+  <files>
+    <file src="bin\Release\GraphQL.dll" target="lib\net45"/>
+    <file src="bin\Release\GraphQL.Server.dll" target="lib\net45"/>
+  </files>
+</package>

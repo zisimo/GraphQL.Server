@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>GraphQL.Server.SimpleInjector</id>
+    <version>0.0.2-alpha</version>
+    <title>GraphQL.Server.SimpleInjector</title>
+    <authors>LobsterInk</authors>
+    <owners>LobsterInk</owners>
+    <licenseUrl>https://github.com/LobsterInk/GraphQL.Server/blob/dev/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/LobsterInk/GraphQL.Server</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>GraphQL Server SimpleInjector support</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright LobsterInk 2016</copyright>
+    <dependencies>
+      <dependency id="GraphQL.Server" version="0.0.2-alpha" />
+    </dependencies>
+  </metadata>
+</package>
