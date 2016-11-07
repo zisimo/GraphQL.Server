@@ -91,29 +91,6 @@ namespace GraphQL.Server
                 var field = new InputField() { Name = argument.Value.Name };
                 var childArguments = argument.Value.Children.OfType<Argument>().ToDictionary(a => a.Name);
                 field.Fields = CollectFields(childArguments);
-                //if (argument.Value.Value is Dictionary<string, object>)
-                //{
-                //    var subFieldObjects = argument.Value.Children as Dictionary<string, object>;
-                //    var subFieldArguments = subFieldObjects.ToDictionary(pair => pair.Key, pair => new Argument() { Name = pair.Key, Value = pair.Value });
-                //    field.Fields = CollectFields(subFieldArguments);
-                //}
-                //if (argument.Value.Value is List<object>)
-                //{
-                //    var subFieldObjects = argument.Value.Value as List<object>;
-                //    var fields = new List<InputField>();
-                //    foreach (var subFieldObject in subFieldObjects)
-                //    {
-                //        var subField = new InputField() { Name = argument.Value.Name };
-                //        if (subFieldObject is Dictionary<string, object>)
-                //        {
-                //            var objects = subFieldObject as Dictionary<string, object>;
-                //            var args = objects.ToDictionary(pair => pair.Key, pair => new Argument() { Name = pair.Key, Value = pair.Value });
-                //            subField.Fields = CollectFields(args);
-                //        }
-                //        fields.Add(subField);
-                //    }
-                //    field.Fields = fields.ToArray();
-                //}
                 output.Add(field);
             }
             return output.ToArray();

@@ -120,10 +120,10 @@ namespace GraphQL.Server
         {
             foreach (var type in ResourceTypes)
             {
-                //var constructors = type.Value.GetConstructors();
-                //if (constructors.Any(c => c.GetParameters().Length == 1 && ))
-                var baseType = type.Value.BaseType.GetGenericTypeDefinition();
-                if (baseType == typeof(GraphObject<>) || baseType == typeof(GraphInterface<>))
+                var baseType = type.Value.BaseType.IsGenericType ? type.Value.BaseType.GetGenericTypeDefinition() : type.Value.BaseType;
+                var isGraphObject = baseType == typeof(GraphObject<>) || baseType == typeof(GraphInterface<>);
+                var isGraphInput = type.Value.IsGenericType && type.Value.GetGenericTypeDefinition() == typeof(GraphInputObject<>);
+                if (isGraphObject || isGraphInput)
                 {
                     Activator.CreateInstance(type.Value, container);
                 }
