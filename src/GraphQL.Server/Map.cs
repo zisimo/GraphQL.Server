@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using GraphQL.Server.Exceptions;
 
 namespace GraphQL.Server
 {
@@ -57,6 +58,7 @@ namespace GraphQL.Server
                     var isEnumerable = sourceProp.PropertyType != typeof(string) && sourceProp.PropertyType.GetInterfaces().Any(t => t.Name.Contains("IEnumerable"));
                     if (isArray || isEnumerable)
                     {
+                        if (field.Fields.Length == 0) continue;
                         var baseType = isArray ? sourceProp.PropertyType.GetElementType() : sourceProp.PropertyType.GenericTypeArguments[0];
                         var listType = typeof(List<>).MakeGenericType(baseType);
                         var list = Activator.CreateInstance(listType);
