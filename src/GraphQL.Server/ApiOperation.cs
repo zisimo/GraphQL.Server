@@ -50,7 +50,8 @@ namespace GraphQL.Server
                 if (context.FieldAst.Arguments != null)
                 {
                     var args = queryArguments.ToDictionary(argument => argument.Name);
-                    var astArgs = context.FieldAst.Arguments.ToDictionary(argument => argument.Name);
+                    var astArgs = context.FieldAst.Arguments.Children.OfType<Argument>().ToDictionary(a => a.Name, a => a.Value);
+                    
                     foreach (var argument in arguments)
                     {
                         if (astArgs.ContainsKey(argument.Value.Name))
@@ -81,6 +82,23 @@ namespace GraphQL.Server
                     throw;
                 }
             });
+        }
+
+        private static InputField[] CollectFields(Dictionary<string, IValue> astArguments)
+        {
+            var output = new List<InputField>();
+            foreach (var argument in astArguments)
+            {
+                var field = new InputField() { Name = argument.Key };
+                var value = argument.Value as ObjectValue;
+                if (value != null)
+                {
+                    var childArguments = value.ObjectFields.ToDictionary(o => o.Name, o => o.Value);
+                    field.Fields = CollectFields(childArguments);
+                }
+                output.Add(field);
+            }
+            return output.ToArray();
         }
 
         private static InputField[] CollectFields(Dictionary<string, Argument> astArguments)

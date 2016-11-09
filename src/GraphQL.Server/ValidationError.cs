@@ -15,11 +15,11 @@ namespace GraphQL.Server
         public string Name { get; set; }
         public object Value { get; set; }
 
-        public static ValidationError ValidateField<T>(List<ValidationError> errors, Dictionary<string, QueryArgument> args, Dictionary<string, Argument> astArgs, ResolveFieldContext context, string field)
+        public static ValidationError ValidateField<T>(List<ValidationError> errors, Dictionary<string, QueryArgument> args, Dictionary<string, IValue> astArgs, ResolveFieldContext context, string field)
         {
             return ValidateField(typeof(T), errors, args, astArgs, context, field);
         }
-        public static ValidationError ValidateField(Type fieldType, List<ValidationError> errors, Dictionary<string, QueryArgument> args, Dictionary<string, Argument> astArgs, ResolveFieldContext<object> context, string field)
+        public static ValidationError ValidateField(Type fieldType, List<ValidationError> errors, Dictionary<string, QueryArgument> args, Dictionary<string, IValue> astArgs, ResolveFieldContext<object> context, string field)
         {
             ValidationError error = null;
             if (args.ContainsKey(field))
