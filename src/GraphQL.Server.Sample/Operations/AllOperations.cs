@@ -86,7 +86,7 @@ namespace GraphQL.Server.Sample.Operations
             public Episodes[] AppearsIn { get; set; }
             public string HomePlanet { get; set; }
 
-            public Address Address { get; set; }
+            public Address[] Address { get; set; }
         }
         public class Address
         {
