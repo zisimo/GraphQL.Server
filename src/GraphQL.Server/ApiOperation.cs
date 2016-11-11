@@ -90,7 +90,16 @@ namespace GraphQL.Server
             foreach (var argument in astArguments)
             {
                 var field = new InputField() { Name = argument.Key };
-                var value = argument.Value as ObjectValue;
+                ObjectValue value = null;
+                if (argument.Value is ListValue)
+                {
+                    var list = (ListValue) argument.Value;
+                    value = (ObjectValue) list.Values.First();
+                }
+                else if (argument.Value is ObjectValue)
+                {
+                    value = (ObjectValue)argument.Value;
+                }
                 if (value != null)
                 {
                     var childArguments = value.ObjectFields.ToDictionary(o => o.Name, o => o.Value);
