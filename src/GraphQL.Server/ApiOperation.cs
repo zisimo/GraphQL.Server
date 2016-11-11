@@ -94,7 +94,7 @@ namespace GraphQL.Server
                 if (argument.Value is ListValue)
                 {
                     var list = (ListValue) argument.Value;
-                    value = (ObjectValue) list.Values.First();
+                    value = list.Values.First() as ObjectValue;
                 }
                 else if (argument.Value is ObjectValue)
                 {
