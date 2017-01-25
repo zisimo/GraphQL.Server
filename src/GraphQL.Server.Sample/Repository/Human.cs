@@ -9,5 +9,7 @@ namespace GraphQL.Server.Sample.Repository
         public int[] Friends { get; set; }
         public Episodes[] AppearsIn { get; set; }
         public string HomePlanet { get; set; }
+
+        public Address Address { get; set; }
     }
 }

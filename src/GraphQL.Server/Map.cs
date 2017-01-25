@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using GraphQL.Server.Exceptions;
 
 namespace GraphQL.Server
 {
@@ -57,21 +58,30 @@ namespace GraphQL.Server
                     var isEnumerable = sourceProp.PropertyType != typeof(string) && sourceProp.PropertyType.GetInterfaces().Any(t => t.Name.Contains("IEnumerable"));
                     if (isArray || isEnumerable)
                     {
+                        if (field.Fields.Length == 0) continue;
                         var baseType = isArray ? sourceProp.PropertyType.GetElementType() : sourceProp.PropertyType.GenericTypeArguments[0];
                         var listType = typeof(List<>).MakeGenericType(baseType);
                         var list = Activator.CreateInstance(listType);
+                        var sourceList = sourceObj as IEnumerable<object>;
                         var extensionList = extensionProp.GetValue(extension) as IEnumerable<object>;
                         var index = 0;
+                        var idFieldAvailable = field.Fields[index].Fields.Any(fv => fv.Name.ToLower() == "id");
                         foreach (var item in extensionList)
                         {
-                            var newItem = Activator.CreateInstance(sourceProp.PropertyType.GenericTypeArguments[0]);
+                            object newItem = null;
+                            if (idFieldAvailable)
+                            {
+                                newItem = FindMatchingObjectById(sourceList, baseType, item);
+                            }
+                            if (newItem == null)
+                            {
+                                newItem = Activator.CreateInstance(baseType);
+                            }
                             newItem = Extend(newItem, item, field.Fields[index].Fields);
                             listType.GetMethod("Add").Invoke(list, new[] { newItem });
                             index++;
                         }
                         sourceObj = list;
-                        //sourceProp.PropertyType.GetMethod("Concat").Invoke(sourceObj, new[] { list });;
-                        //sourceObj = (sourceObj as IEnumerable<object>).Concat(list);
                     }
                     else
                     {
@@ -81,6 +91,15 @@ namespace GraphQL.Server
                 }
             }
             return source;
+        }
+
+        private static object FindMatchingObjectById(IEnumerable<object> sourceList, Type sourceType, object item)
+        {
+            var sourceProp = sourceType.GetProperties().FirstOrDefault(p => p.Name.ToLower() == "id");
+            var itemProp = item.GetType().GetProperties().FirstOrDefault(p => p.Name.ToLower() == "id");
+            if (sourceProp == null || itemProp == null) return null;
+            var itemVal = itemProp.GetValue(item);
+            return sourceList.FirstOrDefault(sourceItem => sourceProp.GetValue(sourceItem).Equals(itemVal));
         }
     }
 }

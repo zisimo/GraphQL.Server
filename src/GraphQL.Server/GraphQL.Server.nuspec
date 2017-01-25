@@ -2,8 +2,8 @@
 <package >
   <metadata>
     <id>GraphQL.Server</id>
-    <version>0.0.2-alpha</version>
     <title>GraphQL.Server</title>
+    <version>$version$</version>
     <authors>LobsterInk</authors>
     <owners>LobsterInk</owners>
     <licenseUrl>https://github.com/LobsterInk/GraphQL.Server/blob/dev/LICENSE</licenseUrl>

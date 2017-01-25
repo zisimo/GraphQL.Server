@@ -50,7 +50,8 @@ namespace GraphQL.Server
                 if (context.FieldAst.Arguments != null)
                 {
                     var args = queryArguments.ToDictionary(argument => argument.Name);
-                    var astArgs = context.FieldAst.Arguments.ToDictionary(argument => argument.Name);
+                    var astArgs = context.FieldAst.Arguments.Children.OfType<Argument>().ToDictionary(a => a.Name, a => a.Value);
+                    
                     foreach (var argument in arguments)
                     {
                         if (astArgs.ContainsKey(argument.Value.Name))
@@ -83,6 +84,40 @@ namespace GraphQL.Server
             });
         }
 
+        private static InputField[] CollectFields(Dictionary<string, IValue> astArguments)
+        {
+            var output = new List<InputField>();
+            foreach (var argument in astArguments)
+            {
+                var field = new InputField() { Name = argument.Key };
+                if (argument.Value is ListValue)
+                {
+                    var list = (ListValue) argument.Value;
+                    var fields = new List<InputField>();
+                    foreach (var child in list.Values)
+                    {
+                        if (child is ObjectValue)
+                        {
+                            var value = (ObjectValue)child;
+                            var childField = new InputField() {Name = argument.Key};
+                            var childArguments = value.ObjectFields.ToDictionary(o => o.Name, o => o.Value);
+                            childField.Fields = CollectFields(childArguments);
+                            fields.Add(childField);
+                        }
+                    }
+                    field.Fields = fields.ToArray();
+                }
+                if (argument.Value is ObjectValue)
+                {
+                    var value = (ObjectValue)argument.Value;
+                    var childArguments = value.ObjectFields.ToDictionary(o => o.Name, o => o.Value);
+                    field.Fields = CollectFields(childArguments);
+                }
+                output.Add(field);
+            }
+            return output.ToArray();
+        }
+
         private static InputField[] CollectFields(Dictionary<string, Argument> astArguments)
         {
             var output = new List<InputField>();
@@ -91,29 +126,6 @@ namespace GraphQL.Server
                 var field = new InputField() { Name = argument.Value.Name };
                 var childArguments = argument.Value.Children.OfType<Argument>().ToDictionary(a => a.Name);
                 field.Fields = CollectFields(childArguments);
-                //if (argument.Value.Value is Dictionary<string, object>)
-                //{
-                //    var subFieldObjects = argument.Value.Children as Dictionary<string, object>;
-                //    var subFieldArguments = subFieldObjects.ToDictionary(pair => pair.Key, pair => new Argument() { Name = pair.Key, Value = pair.Value });
-                //    field.Fields = CollectFields(subFieldArguments);
-                //}
-                //if (argument.Value.Value is List<object>)
-                //{
-                //    var subFieldObjects = argument.Value.Value as List<object>;
-                //    var fields = new List<InputField>();
-                //    foreach (var subFieldObject in subFieldObjects)
-                //    {
-                //        var subField = new InputField() { Name = argument.Value.Name };
-                //        if (subFieldObject is Dictionary<string, object>)
-                //        {
-                //            var objects = subFieldObject as Dictionary<string, object>;
-                //            var args = objects.ToDictionary(pair => pair.Key, pair => new Argument() { Name = pair.Key, Value = pair.Value });
-                //            subField.Fields = CollectFields(args);
-                //        }
-                //        fields.Add(subField);
-                //    }
-                //    field.Fields = fields.ToArray();
-                //}
                 output.Add(field);
             }
             return output.ToArray();

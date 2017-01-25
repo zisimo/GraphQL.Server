@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using GraphQL.Server.Sample.Objects;
 using GraphQL.Server.Sample.Repository;
+using GraphQL.Server.Types;
 using GraphQL.Types;
 
 namespace GraphQL.Server.Sample.Operations
@@ -61,6 +62,21 @@ namespace GraphQL.Server.Sample.Operations
         public class SearchHeroesInput
         {
             public string Text { get; set; }
+            public Order Order { get; set; }
+        }
+        public class Order
+        {
+            public string OrderBy { get; set; }
+            public OrderByDirection? Direction { get; set; }
+        }
+        public enum OrderByDirection
+        {
+            Ascending,
+            Descending
+        }
+        public class OrderByDirectionEnum : GraphEnum<OrderByDirection>
+        {
+            
         }
         public class CreateHumanInput
         {
@@ -69,6 +85,16 @@ namespace GraphQL.Server.Sample.Operations
             public int[] Friends { get; set; }
             public Episodes[] AppearsIn { get; set; }
             public string HomePlanet { get; set; }
+
+            public Address[] Address { get; set; }
+        }
+        public class Address
+        {
+            public string AddressLine1 { get; set; }
+            public string AddressLine2 { get; set; }
+            public string City { get; set; }
+            public string PostCode { get; set; }
+            public string Country { get; set; }
         }
     }
 }
