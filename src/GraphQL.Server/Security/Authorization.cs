@@ -6,7 +6,7 @@ namespace GraphQL.Server.Security
     {
         public string[] Roles { get; set; }
         public string TargetName { get; set; }
-        
+
         public static Authorization Create(string name, params string[] roles)
         {
             return new Authorization()

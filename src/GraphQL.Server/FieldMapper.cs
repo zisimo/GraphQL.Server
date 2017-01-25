@@ -66,7 +66,8 @@ namespace GraphQL.Server
 
         private static void AuthorizeProperty(IContainer container, string authFieldName)
         {
-            if (!container.GetInstance<AuthorizationMap>().Authorize(authFieldName))
+            var permissions = container.GetInstance<UserPermissions>().Permissions;
+            if (!container.GetInstance<AuthorizationMap>().Authorize(authFieldName, permissions))
             {
                 throw new AuthorizationException(authFieldName);
             }

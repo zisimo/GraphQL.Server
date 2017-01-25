@@ -16,5 +16,10 @@ namespace GraphQL.Server
             var fieldName = StringExtensions.PascalCase((memberExpression.Member as PropertyInfo).Name);
             return fields.FirstOrDefault(f => f.Name == fieldName);
         }
+
+        public bool NameEquals(string value)
+        {
+            return Name.Equals(value, StringComparison.OrdinalIgnoreCase);
+        }
     }
 }

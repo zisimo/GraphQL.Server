@@ -9,17 +9,10 @@ namespace GraphQL.Server.Security
     {
         public bool AllowMissingAuthorizations { get; set; }
         public List<Authorization> Authorizations { get; set; }
-        public string[] CurrentRoles { get; private set; }
 
         public AuthorizationMap()
         {
             Authorizations = new List<Authorization>();
-            CurrentRoles = new string[0];
-        }
-
-        public void SetCurrentRoles(string[] roles)
-        {
-            CurrentRoles = roles;
         }
 
         public Authorization AddAuthorization(Type parentType, PropertyInfo propertyInfo)
@@ -39,10 +32,10 @@ namespace GraphQL.Server.Security
             return authorization;
         }
 
-        public bool Authorize(string name)
+        public bool Authorize(string name, string[] permissions)
         {
             var authorization = Authorizations.FirstOrDefault(a => a.TargetName == name);
-            var authorizationAllowed = authorization != null && authorization.Authorize(CurrentRoles);
+            var authorizationAllowed = authorization != null && authorization.Authorize(permissions);
             if (!authorizationAllowed && authorization == null && AllowMissingAuthorizations)
             {
                 authorizationAllowed = true;

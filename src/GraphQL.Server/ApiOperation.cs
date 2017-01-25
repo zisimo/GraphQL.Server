@@ -133,7 +133,8 @@ namespace GraphQL.Server
 
         private static void AuthorizeFunction(IContainer container, string qualifiedFunctionName)
         {
-            if (!container.GetInstance<AuthorizationMap>().Authorize(qualifiedFunctionName))
+            var permissions = container.GetInstance<UserPermissions>().Permissions;
+            if (!container.GetInstance<AuthorizationMap>().Authorize(qualifiedFunctionName, permissions))
             {
                 throw new AuthorizationException(qualifiedFunctionName);
             }
