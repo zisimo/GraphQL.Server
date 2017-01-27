@@ -15,5 +15,13 @@
     <dependencies>
       <dependency id="GraphQL.Server" version="$version$" />
     </dependencies>
+    <references>
+      <group>
+        <reference file="GraphQL.Server.SimpleInjector.dll" />
+      </group>
+    </references>
   </metadata>
+  <files>
+    <file src="bin\Release\GraphQL.Server.SimpleInjector.dll" target="lib\net45"/>
+  </files>
 </package>
