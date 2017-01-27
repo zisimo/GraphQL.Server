@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using GraphQL.Server.Exceptions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -25,22 +24,22 @@ namespace GraphQL.Server
                 Errors = new List<GraphQLError>();
                 foreach (var exception in exceptions)
                 {
-                    var usableException = exception.InnerException ?? exception;
-                    var error = new GraphQLError(exception.Message, usableException.StackTrace);
-                    if (exception.InnerException != null) error.Detail = exception.InnerException.Message;
+                    var error = new GraphQLError(exception.Message, GetExceptionInformation(exception));
+                    var innerException = exception.InnerException;
+                    while (innerException != null)
+                    {
+                        error.Detail = innerException.Message;
+                        innerException = innerException.InnerException;
+                    }
                     Errors.Add(error);
                 }
             }
         }
 
-        private static string GetExceptionType(Exception exception)
+        private static string GetExceptionInformation(Exception exception)
         {
-            var innerException = exception.InnerException as GraphException;
-            if (innerException != null)
-            {
-                return innerException.GetType().Name.Split(new[] { "Exception" }, StringSplitOptions.RemoveEmptyEntries)[0];
-            }
-            return null;
+            if (exception == null) return string.Empty;
+            return $"====={exception.Message}={exception.StackTrace}{GetExceptionInformation(exception.InnerException)}";
         }
 
         public T GetData<T>(string operation)
