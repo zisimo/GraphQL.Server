@@ -57,5 +57,24 @@ namespace GraphQL.Server.Test
 }";
             AssertQuery(query, null, expected);
         }
+
+        [Test]
+        public void TestNullInputQuery()
+        {
+            var query = @"query{searchHeroes(text:null){id}}";
+            var expected = @"{
+    ""data"": {
+        ""searchHeroes"": [
+            {
+                ""id"": 2
+            },
+            {
+                ""id"": 3
+            }
+        ]
+    }
+}";
+            AssertQuery(query, null, expected);
+        }
     }
 }

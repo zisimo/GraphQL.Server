@@ -48,7 +48,7 @@ namespace GraphQL.Server.Sample.Operations
         }
         private ICharacter[] SearchHeroes(SearchHeroesInput input, InputField[] fields)
         {
-            return Container.GetInstance<Data>().SearchHeroes(input.Text);
+            return Container.GetInstance<Data>().SearchHeroes(input.Text ?? string.Empty);
         }
 
         // ==================== Mutations ====================
@@ -76,7 +76,7 @@ namespace GraphQL.Server.Sample.Operations
         }
         public class OrderByDirectionEnum : GraphEnum<OrderByDirection>
         {
-            
+
         }
         public class CreateHumanInput
         {

@@ -116,22 +116,23 @@ namespace GraphQL.Server
             }
         }
 
-        public static void InitializeTypes(IContainer container)
+        public static void InitializeTypes(IContainer container, ApiSchema schema)
         {
-            foreach (var type in ResourceTypes)
-            {
-                var baseType = type.Value.BaseType.IsGenericType ? type.Value.BaseType.GetGenericTypeDefinition() : type.Value.BaseType;
-                var isGraphObject = baseType == typeof(GraphObject<>) || baseType == typeof(GraphInterface<>);
-                var isGraphInput = type.Value.IsGenericType && type.Value.GetGenericTypeDefinition() == typeof(GraphInputObject<>);
-                if (isGraphObject || isGraphInput)
-                {
-                    Activator.CreateInstance(type.Value, container);
-                }
-                else
-                {
-                    Activator.CreateInstance(type.Value);
-                }
-            }
+            schema.RegisterTypes(ResourceTypes.Values.ToArray());
+            //foreach (var type in ResourceTypes)
+            //{
+            //    var baseType = type.Value.BaseType.IsGenericType ? type.Value.BaseType.GetGenericTypeDefinition() : type.Value.BaseType;
+            //    var isGraphObject = baseType == typeof(GraphObject<>) || baseType == typeof(GraphInterface<>);
+            //    var isGraphInput = type.Value.IsGenericType && type.Value.GetGenericTypeDefinition() == typeof(GraphInputObject<>);
+            //    if (isGraphObject || isGraphInput)
+            //    {
+            //        Activator.CreateInstance(type.Value, container);
+            //    }
+            //    else
+            //    {
+            //        Activator.CreateInstance(type.Value);
+            //    }
+            //}
         }
     }
 }

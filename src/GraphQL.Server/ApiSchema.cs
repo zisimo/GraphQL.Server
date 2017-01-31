@@ -17,7 +17,7 @@ namespace GraphQL.Server
                 TypeLoader.LoadTypes(assembly);
                 TypeLoader.LoadOperations(container, assembly, this);
             }
-            TypeLoader.InitializeTypes(container);
+            TypeLoader.InitializeTypes(container, this);
         }
     }
 }
