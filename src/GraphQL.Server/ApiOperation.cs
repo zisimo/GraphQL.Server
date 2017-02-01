@@ -45,7 +45,7 @@ namespace GraphQL.Server
             {
                 AuthorizeFunction(Container, authFieldName);
                 var values = new Dictionary<string, object>();
-                var errors = new List<ValidationError>();
+                //var errors = new List<ValidationError>();
                 InputField[] fields = null;
                 if (context.FieldAst.Arguments != null)
                 {
@@ -65,9 +65,9 @@ namespace GraphQL.Server
                             {
                             }
                         }
-                        ValidationError.ValidateField(argument.Value.Type, errors, args, astArgs, context, argument.Value.Name);
+                        //ValidationError.ValidateField(argument.Value.Type, errors, args, astArgs, context, argument.Value.Name);
                     }
-                    ValidationError.Throw(errors.ToArray());
+                    //ValidationError.Throw(errors.ToArray());
                     fields = CollectFields(astArgs);
                 }
                 var valuesJson = JsonConvert.SerializeObject(values);
