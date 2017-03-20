@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -12,16 +11,6 @@ namespace GraphQL.Server
     public class TypeLoader
     {
         private static Dictionary<string, TypeMapping> _typeMappings;
-
-        private static Dictionary<string, Assembly> _assemblies;
-        private static Dictionary<string, Assembly> Assemblies
-        {
-            get
-            {
-                if (_assemblies == null) _assemblies = new Dictionary<string, Assembly>();
-                return _assemblies;
-            }
-        }
 
         public static Type[] ExcludedTypes = new [] { typeof(GraphInputObject<>), typeof(GraphObject<>), typeof(IContainer) };
         public static Dictionary<string, TypeMapping> TypeMappings
@@ -94,19 +83,8 @@ namespace GraphQL.Server
             return typeMapping;
         }
 
-        public static bool IsGraphClass(Type type)
-        {
-            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof (GraphObject<>);
-        }
-
-        public static Type GetGraphClassEntity(Type type)
-        {
-            return type.GenericTypeArguments[0];
-        }
-
         public static void LoadTypes(Assembly assembly)
         {
-            Assemblies[assembly.FullName] = assembly;
             List<Type> types = new List<Type>();
             // GraphObject
             types.AddRange(assembly.ExportedTypes.Where(t => t.BaseType != null && t.BaseType.IsGenericType && typeof(GraphObject<>) == t.BaseType.GetGenericTypeDefinition()));
@@ -116,6 +94,7 @@ namespace GraphQL.Server
             types.AddRange(assembly.ExportedTypes.Where(t => t.BaseType != null && t.BaseType.IsGenericType && typeof(GraphEnum<>) == t.BaseType.GetGenericTypeDefinition()));
             // GraphInterface
             types.AddRange(assembly.ExportedTypes.Where(t => t.BaseType != null && t.BaseType.IsGenericType && typeof(GraphInterface<>) == t.BaseType.GetGenericTypeDefinition()));
+
             foreach (var type in types)
             {
                 if (ExcludedTypes.Contains(type)) continue;
