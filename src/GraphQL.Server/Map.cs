@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using GraphQL.Server.Exceptions;
+using Newtonsoft.Json;
 
 namespace GraphQL.Server
 {
@@ -91,6 +92,11 @@ namespace GraphQL.Server
                 }
             }
             return source;
+        }
+
+        public static T Extend<T>(object obj)
+        {
+            return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(obj));
         }
 
         private static object FindMatchingObjectById(IEnumerable<object> sourceList, Type sourceType, object item)

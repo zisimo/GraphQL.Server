@@ -45,7 +45,9 @@ namespace GraphQL.Server.Test
             Container.Verify();
 
             Executer = new DocumentExecuter();
-            Schema = new ApiSchema(Container, Assembly.GetExecutingAssembly(), typeof(AllOperations).Assembly);
+            Schema = new ApiSchema(Container);
+            Schema.AutoMap(Assembly.GetExecutingAssembly(), typeof(AllOperations).Assembly);
+            Schema.Lock();
         }
 
         protected void AssertQuery(string query, Inputs inputs, string expectedJson)

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GraphQL.Language;
 using GraphQL.Language.AST;
 using GraphQL.Types;
 using GraphQL.Server.Security;
@@ -14,6 +13,36 @@ namespace GraphQL.Server
         public ApiOperation(IContainer container, string name) : base(container)
         {
             Name = name;
+        }
+
+        public void AddQuery<TOutput, TInput>(Func<TInput, TOutput> function)
+            where TOutput : class
+            where TInput : class, new()
+        {
+            var fieldName = StringExtensions.PascalCase(function.Method.Name);
+            var fieldDescription = "";
+            var arguments = GraphArguments.FromModel<TInput>();
+            var queryArguments = arguments.GetQueryArguments();
+            // Add function as operation
+            var graphType = TypeLoader.GetGraphType(typeof(TOutput));
+            Field(graphType, fieldName, fieldDescription, queryArguments, context =>
+            {
+                var values = new Dictionary<string, object>();
+                if (context.FieldAst.Arguments != null)
+                {
+                    var astArgs = context.FieldAst.Arguments.Children.OfType<Argument>().ToDictionary(a => a.Name, a => a.Value);
+                    foreach (var argument in arguments)
+                    {
+                        if (!astArgs.ContainsKey(argument.Value.Name)) continue;
+                        var jsonString = JsonConvert.SerializeObject(context.Arguments[argument.Value.Name]);
+                        values[argument.Value.Name] = JsonConvert.DeserializeObject(jsonString, argument.Value.Type);
+                    }
+                }
+                var valuesJson = JsonConvert.SerializeObject(values);
+                var inputModel = JsonConvert.DeserializeObject<TInput>(valuesJson);
+                ValidationError.ValidateObject(inputModel);
+                return function.Invoke(inputModel);
+            });
         }
 
         public void AddQuery<TOutputObject, TInput>(Func<TInput, InputField[], object> function)
@@ -45,13 +74,11 @@ namespace GraphQL.Server
             {
                 AuthorizeFunction(Container, authFieldName);
                 var values = new Dictionary<string, object>();
-                //var errors = new List<ValidationError>();
                 InputField[] fields = null;
                 if (context.FieldAst.Arguments != null)
                 {
-                    var args = queryArguments.ToDictionary(argument => argument.Name);
                     var astArgs = context.FieldAst.Arguments.Children.OfType<Argument>().ToDictionary(a => a.Name, a => a.Value);
-                    
+
                     foreach (var argument in arguments)
                     {
                         if (astArgs.ContainsKey(argument.Value.Name))
@@ -65,9 +92,7 @@ namespace GraphQL.Server
                             {
                             }
                         }
-                        //ValidationError.ValidateField(argument.Value.Type, errors, args, astArgs, context, argument.Value.Name);
                     }
-                    //ValidationError.Throw(errors.ToArray());
                     fields = CollectFields(astArgs);
                 }
                 var valuesJson = JsonConvert.SerializeObject(values);
@@ -92,14 +117,14 @@ namespace GraphQL.Server
                 var field = new InputField() { Name = argument.Key };
                 if (argument.Value is ListValue)
                 {
-                    var list = (ListValue) argument.Value;
+                    var list = (ListValue)argument.Value;
                     var fields = new List<InputField>();
                     foreach (var child in list.Values)
                     {
                         if (child is ObjectValue)
                         {
                             var value = (ObjectValue)child;
-                            var childField = new InputField() {Name = argument.Key};
+                            var childField = new InputField() { Name = argument.Key };
                             var childArguments = value.ObjectFields.ToDictionary(o => o.Name, o => o.Value);
                             childField.Fields = CollectFields(childArguments);
                             fields.Add(childField);
@@ -113,19 +138,6 @@ namespace GraphQL.Server
                     var childArguments = value.ObjectFields.ToDictionary(o => o.Name, o => o.Value);
                     field.Fields = CollectFields(childArguments);
                 }
-                output.Add(field);
-            }
-            return output.ToArray();
-        }
-
-        private static InputField[] CollectFields(Dictionary<string, Argument> astArguments)
-        {
-            var output = new List<InputField>();
-            foreach (var argument in astArguments)
-            {
-                var field = new InputField() { Name = argument.Value.Name };
-                var childArguments = argument.Value.Children.OfType<Argument>().ToDictionary(a => a.Name);
-                field.Fields = CollectFields(childArguments);
                 output.Add(field);
             }
             return output.ToArray();

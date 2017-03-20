@@ -10,17 +10,18 @@ namespace GraphQL.Server
         public ApiOperation Query { get; private set; }
         public ApiOperation Mutation { get; private set; }
 
-        public ApiSchema(IContainer container, params Assembly[] assemblies) : base(type => (GraphType)container.GetInstance(type))
+        public ApiSchema(IContainer container) : base(type => (GraphType)container.GetInstance(type))
         {
             Container = container;
             base.Query = Query = new ApiOperation(container, "Query");
             base.Mutation = Mutation = new ApiOperation(container, "Mutation");
-            foreach (var assembly in assemblies)
-            {
-                TypeLoader.LoadTypes(assembly);
-                TypeLoader.LoadOperations(container, assembly, this);
-            }
-            
+        }
+
+        public void MapOutput<TOutput>()
+            where TOutput : class
+        {
+            var type = typeof(GraphObjectMap<>).MakeGenericType(typeof(TOutput));
+            TypeLoader.AddType(typeof(TOutput), type);
         }
 
         public void MapOutput<TInput, TOutput>()
@@ -29,6 +30,15 @@ namespace GraphQL.Server
         {
             var type = typeof(GraphObjectMap<,>).MakeGenericType(typeof(TInput), typeof(TOutput));
             TypeLoader.AddType(typeof(TInput), type);
+        }
+
+        public void AutoMap(params Assembly[] assemblies)
+        {
+            foreach (var assembly in assemblies)
+            {
+                TypeLoader.LoadTypes(assembly);
+                TypeLoader.LoadOperations(Container, assembly, this);
+            }
         }
 
         public void Lock()

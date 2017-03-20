@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Web.Http;
 using GraphQL.Server.Sample.Objects;
+using GraphQL.Server.Sample.Output;
 using GraphQL.Server.Sample.Repository;
 using GraphQL.Server.Security;
 using GraphQL.Server.SimpleInjector;
@@ -30,14 +31,16 @@ namespace GraphQL.Server.Sample
             //Graph Schema
             container.RegisterSingleton<ApiSchema>(() =>
             {
-                var apiSchema = new ApiSchema(container, Assembly.GetAssembly(typeof(HumanObject)));
+                var apiSchema = new ApiSchema(container);
 
                 // map a type without GraphObject implementation
-                apiSchema.MapOutput<Robot, Output.RobotOutput>();
+                //apiSchema.MapOutput<Robot, Output.RobotOutput>();
+                apiSchema.MapOutput<RobotOutput>();
 
                 // map an operation without IOperation implementation
                 //apiSchema.MapOperation
 
+                apiSchema.AutoMap(Assembly.GetAssembly(typeof(HumanObject)));
                 apiSchema.Lock();
                 return apiSchema;
             });

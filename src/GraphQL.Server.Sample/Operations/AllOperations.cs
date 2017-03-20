@@ -23,7 +23,6 @@ namespace GraphQL.Server.Sample.Operations
             schema.Query.AddQuery<DroidObject, IdInput>(GetDroid);
             schema.Query.AddQuery<ICharacterInterface, IdInput>(GetHero);
             schema.Query.AddQuery<ListGraphType<ICharacterInterface>, SearchHeroesInput>(SearchHeroes);
-            schema.Query.AddQuery<GraphObjectMap<Robot, RobotOutput>, IdInput>(GetRobot);
 
             //Mutations
             schema.Mutation.AddQuery<HumanObject, CreateHumanInput>(CreateHuman);

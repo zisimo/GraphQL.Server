@@ -120,6 +120,7 @@
     <Compile Include="Objects\HumanObject.cs" />
     <Compile Include="Objects\ICharacterInterface.cs" />
     <Compile Include="Operations\AllOperations.cs" />
+    <Compile Include="Operations\RobotOperation.cs" />
     <Compile Include="Output\RobotOutput.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository\Address.cs" />
