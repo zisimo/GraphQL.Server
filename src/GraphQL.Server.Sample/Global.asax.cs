@@ -32,7 +32,6 @@ namespace GraphQL.Server.Sample
             container.RegisterSingleton<ApiSchema>(() =>
             {
                 var apiSchema = new ApiSchema(container);
-
                 // map a type without GraphObject implementation
                 //apiSchema.MapOutput<Robot, Output.RobotOutput>();
                 apiSchema.MapOutput<RobotOutput>();
@@ -40,11 +39,10 @@ namespace GraphQL.Server.Sample
                 // map an operation without IOperation implementation
                 //apiSchema.MapOperation
 
-                apiSchema.AutoMap(Assembly.GetAssembly(typeof(HumanObject)));
+                apiSchema.MapAssemblies(Assembly.GetAssembly(typeof(HumanObject)));
                 apiSchema.Lock();
                 return apiSchema;
             });
-
             container.Verify();
 
             GlobalConfiguration.Configuration.DependencyResolver = new SimpleInjectorWebApiDependencyResolver(container);

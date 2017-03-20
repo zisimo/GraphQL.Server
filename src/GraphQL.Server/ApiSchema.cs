@@ -1,5 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using GraphQL.Server.Types;
 using GraphQL.Types;
 
 namespace GraphQL.Server
@@ -32,12 +35,32 @@ namespace GraphQL.Server
             TypeLoader.AddType(typeof(TInput), type);
         }
 
-        public void AutoMap(params Assembly[] assemblies)
+        public void MapAssemblies(params Assembly[] assemblies)
         {
+            var types = new List<Type>();
+            var operationTypes = new List<Type>();
             foreach (var assembly in assemblies)
             {
-                TypeLoader.LoadTypes(assembly);
-                TypeLoader.LoadOperations(Container, assembly, this);
+                // GraphObject
+                types.AddRange(assembly.ExportedTypes.Where(t => t.BaseType != null && t.BaseType.IsGenericType && typeof(GraphObject<>) == t.BaseType.GetGenericTypeDefinition()));
+                // GraphInputObject
+                types.AddRange(assembly.ExportedTypes.Where(t => t.BaseType != null && t.BaseType.IsGenericType && typeof(GraphInputObject<>) == t.BaseType.GetGenericTypeDefinition()));
+                // GraphEnum
+                types.AddRange(assembly.ExportedTypes.Where(t => t.BaseType != null && t.BaseType.IsGenericType && typeof(GraphEnum<>) == t.BaseType.GetGenericTypeDefinition()));
+                // GraphInterface
+                types.AddRange(assembly.ExportedTypes.Where(t => t.BaseType != null && t.BaseType.IsGenericType && typeof(GraphInterface<>) == t.BaseType.GetGenericTypeDefinition()));
+
+                // Operations
+                operationTypes.AddRange(assembly.ExportedTypes.Where(t => typeof(IOperation).IsAssignableFrom(t)));
+            }
+            foreach (var type in types)
+            {
+                TypeLoader.AddType(type.BaseType.GenericTypeArguments.First(), type);
+            }
+            foreach (var type in operationTypes)
+            {
+                var operation = (IOperation)Container.GetInstance(type);
+                operation.Register(this);
             }
         }
 

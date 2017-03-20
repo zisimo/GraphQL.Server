@@ -6,5 +6,14 @@ namespace GraphQL.Server
     {
         T GetInstance<T>() where T : class;
         object GetInstance(Type type);
+        void Register(Type type);
+
+        void Register<TConcrete>()
+            where TConcrete : class;
+
+        void Register<TService, TImplementation>()
+            where TService : class
+            where TImplementation : class, TService;
+
     }
 }

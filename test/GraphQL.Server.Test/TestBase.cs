@@ -42,11 +42,12 @@ namespace GraphQL.Server.Test
             Container.Register(() => Data);
             Container.Register(() => AuthorizationMap);
             Container.Register<AllOperations>();
+            Schema = new ApiSchema(Container);
+            Schema.MapAssemblies(Assembly.GetAssembly(typeof(AllOperations)));
             Container.Verify();
 
             Executer = new DocumentExecuter();
-            Schema = new ApiSchema(Container);
-            Schema.AutoMap(Assembly.GetExecutingAssembly(), typeof(AllOperations).Assembly);
+            
             Schema.Lock();
         }
 

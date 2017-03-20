@@ -73,43 +73,16 @@ namespace GraphQL.Server
 
         public static TypeMapping AddType(Type type, Type graphType)
         {
+            if (ExcludedTypes.Contains(graphType)) return null;
             var typeMapping = new TypeMapping()
             {
                 TypeName = type.FullName,
                 Type = type,
                 GraphType = graphType
             };
-            TypeMappings.Add(typeMapping.TypeName, typeMapping);
+            //TypeMappings.Add(typeMapping.TypeName, typeMapping);
+            TypeMappings[typeMapping.TypeName] = typeMapping;
             return typeMapping;
-        }
-
-        public static void LoadTypes(Assembly assembly)
-        {
-            List<Type> types = new List<Type>();
-            // GraphObject
-            types.AddRange(assembly.ExportedTypes.Where(t => t.BaseType != null && t.BaseType.IsGenericType && typeof(GraphObject<>) == t.BaseType.GetGenericTypeDefinition()));
-            // GraphInputObject
-            types.AddRange(assembly.ExportedTypes.Where(t => t.BaseType != null && t.BaseType.IsGenericType && typeof(GraphInputObject<>) == t.BaseType.GetGenericTypeDefinition()));
-            // GraphEnum
-            types.AddRange(assembly.ExportedTypes.Where(t => t.BaseType != null && t.BaseType.IsGenericType && typeof(GraphEnum<>) == t.BaseType.GetGenericTypeDefinition()));
-            // GraphInterface
-            types.AddRange(assembly.ExportedTypes.Where(t => t.BaseType != null && t.BaseType.IsGenericType && typeof(GraphInterface<>) == t.BaseType.GetGenericTypeDefinition()));
-
-            foreach (var type in types)
-            {
-                if (ExcludedTypes.Contains(type)) continue;
-                AddType(type.BaseType.GenericTypeArguments.First(), type);
-            }
-        }
-
-        public static void LoadOperations(IContainer container, Assembly assembly, ApiSchema schema)
-        {
-            var types = assembly.ExportedTypes.Where(t => typeof(IOperation).IsAssignableFrom(t)).ToDictionary(t => t.Name, t => t);
-            foreach (var type in types)
-            {
-                var operation = (IOperation) container.GetInstance(type.Value);
-                operation.Register(schema);
-            }
         }
 
         public class TypeMapping

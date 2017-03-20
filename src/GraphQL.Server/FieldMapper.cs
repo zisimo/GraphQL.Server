@@ -60,7 +60,8 @@ namespace GraphQL.Server
             {
                 graphType = typeof(NonNullGraphType<>).MakeGenericType(graphType);
             }
-            obj.Field(graphType, fieldName, fieldDescription, null, contextResolve);
+            var field = obj.Field(graphType, fieldName, fieldDescription, null, contextResolve);
+            //field.ResolvedType = (IGraphType)Activator.CreateInstance(graphType);
             container.GetInstance<AuthorizationMap>().AddAuthorization(type, propertyInfo);
         }
 
