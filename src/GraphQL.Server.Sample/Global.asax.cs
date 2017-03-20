@@ -1,10 +1,9 @@
 ﻿using System.Reflection;
 using System.Web.Http;
-using GraphQL.Server.Sample.Operations;
+using GraphQL.Server.Sample.Objects;
 using GraphQL.Server.Sample.Repository;
 using GraphQL.Server.Security;
 using GraphQL.Server.SimpleInjector;
-using GraphQL.Types;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -27,8 +26,22 @@ namespace GraphQL.Server.Sample
             container.Register<Data>(() => data);
             var authorizationMap = new AuthorizationMap() { AllowMissingAuthorizations = true };
             container.Register<AuthorizationMap>(() => authorizationMap);
-            container.Register<AllOperations>();
-            
+
+            //Graph Schema
+            container.RegisterSingleton<ApiSchema>(() =>
+            {
+                var apiSchema = new ApiSchema(container, Assembly.GetAssembly(typeof(HumanObject)));
+
+                // map a type without GraphObject implementation
+                apiSchema.MapOutput<Robot, Output.RobotOutput>();
+
+                // map an operation without IOperation implementation
+                //apiSchema.MapOperation
+
+                apiSchema.Lock();
+                return apiSchema;
+            });
+
             container.Verify();
 
             GlobalConfiguration.Configuration.DependencyResolver = new SimpleInjectorWebApiDependencyResolver(container);

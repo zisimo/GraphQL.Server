@@ -1,6 +1,7 @@
 ﻿using GraphQL.Server.Exceptions;
 using System.ComponentModel.DataAnnotations;
 using GraphQL.Server.Sample.Objects;
+using GraphQL.Server.Sample.Output;
 using GraphQL.Server.Sample.Repository;
 using GraphQL.Server.Types;
 using GraphQL.Types;
@@ -22,6 +23,7 @@ namespace GraphQL.Server.Sample.Operations
             schema.Query.AddQuery<DroidObject, IdInput>(GetDroid);
             schema.Query.AddQuery<ICharacterInterface, IdInput>(GetHero);
             schema.Query.AddQuery<ListGraphType<ICharacterInterface>, SearchHeroesInput>(SearchHeroes);
+            schema.Query.AddQuery<GraphObjectMap<Robot, RobotOutput>, IdInput>(GetRobot);
 
             //Mutations
             schema.Mutation.AddQuery<HumanObject, CreateHumanInput>(CreateHuman);
@@ -49,6 +51,12 @@ namespace GraphQL.Server.Sample.Operations
         private ICharacter[] SearchHeroes(SearchHeroesInput input, InputField[] fields)
         {
             return Container.GetInstance<Data>().SearchHeroes(input.Text ?? string.Empty);
+        }
+        private Robot GetRobot(IdInput input, InputField[] fields)
+        {
+            var robot = Container.GetInstance<Data>().GetRobot(input.Id);
+            if (robot == null) throw new NotFoundException<Robot>(input.Id);
+            return robot;
         }
 
         // ==================== Mutations ====================

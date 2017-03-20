@@ -1,11 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
+using GraphQL.Execution;
 using GraphQL.Types;
+using GraphQL.Validation.Complexity;
 
 namespace GraphQL.Server.Sample.Controllers
 {
@@ -21,8 +22,8 @@ namespace GraphQL.Server.Sample.Controllers
         public ApiController(IContainer container)
         {
             Container = container;
-            Executer = new DocumentExecuter();
-            Schema = new ApiSchema(container, Assembly.GetExecutingAssembly());
+            Executer = new DocumentExecuter(new GraphQLDocumentBuilder(), new ApiValidator(container), new ComplexityAnalyzer());
+            Schema = Container.GetInstance<ApiSchema>();
         }
 
         [Route("")]

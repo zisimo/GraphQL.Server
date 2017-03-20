@@ -5,12 +5,13 @@ using System.Linq;
 using System.Reflection;
 using GraphQL.Types;
 using GraphQL.Server.Exceptions;
+using GraphQL.Server.Types;
 
 namespace GraphQL.Server
 {
     public class TypeLoader
     {
-        private static Dictionary<string, Type> _resourceTypes;
+        private static Dictionary<string, TypeMapping> _typeMappings;
 
         private static Dictionary<string, Assembly> _assemblies;
         private static Dictionary<string, Assembly> Assemblies
@@ -23,15 +24,15 @@ namespace GraphQL.Server
         }
 
         public static Type[] ExcludedTypes = new [] { typeof(GraphInputObject<>), typeof(GraphObject<>), typeof(IContainer) };
-        public static Dictionary<string, Type> ResourceTypes
+        public static Dictionary<string, TypeMapping> TypeMappings
         {
             get
             {
-                if (_resourceTypes == null)
+                if (_typeMappings == null)
                 {
-                    _resourceTypes = new Dictionary<string, Type>();
+                    _typeMappings = new Dictionary<string, TypeMapping>();
                 }
-                return _resourceTypes;
+                return _typeMappings;
             }
         }
         public static Dictionary<Type, Type> BasicTypeMappings = new Dictionary<Type, Type>()
@@ -49,8 +50,6 @@ namespace GraphQL.Server
 
         public static Type GetGraphType(Type type, bool inputType = false)
         {
-            Type output = null;
-            string resourceName = null;
             var isList = false;
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>)) type = type.GenericTypeArguments[0];
             if (type.IsArray)
@@ -63,25 +62,36 @@ namespace GraphQL.Server
                 isList = true;
                 type = type.GenericTypeArguments[0];
             }
-            if (TypeLoader.BasicTypeMappings.ContainsKey(type)) output = TypeLoader.BasicTypeMappings[type];
-            else if (type.IsEnum) resourceName = $"{type.Name}Enum";
-            else if (type.IsInterface || type.IsAbstract) resourceName = $"{type.Name}Interface";
-            else if (type.IsClass)
+            if (TypeLoader.BasicTypeMappings.ContainsKey(type)) return TypeLoader.BasicTypeMappings[type];
+            if (!TypeMappings.ContainsKey(type.FullName))
             {
-                resourceName = $"{type.Name}Object";
-                if (!TypeLoader.ResourceTypes.ContainsKey(resourceName) && inputType)
+                if (type.IsEnum)
                 {
-                    TypeLoader.ResourceTypes[resourceName] = typeof(GraphInputObject<>).MakeGenericType(type);
+                    AddType(type, typeof(GraphEnum<>).MakeGenericType(type));
+                }
+                else if (inputType)
+                {
+                    AddType(type, typeof(GraphInputObject<>).MakeGenericType(type));
+                }
+                else
+                {
+                    throw new GraphException($"No TypeMapping mapping found for {type.FullName}");
                 }
             }
+            var typeMapping = TypeMappings[type.FullName];
+            return isList ? typeof(ListGraphType<>).MakeGenericType(typeMapping.GraphType) : typeMapping.GraphType;
+        }
 
-            if (resourceName != null && TypeLoader.ResourceTypes.ContainsKey(resourceName)) output = TypeLoader.ResourceTypes[resourceName];
-            if (output == null) throw new GraphException($"No resource mapping found for {type.FullName}");
-            if (isList)
+        public static TypeMapping AddType(Type type, Type graphType)
+        {
+            var typeMapping = new TypeMapping()
             {
-                output = typeof(ListGraphType<>).MakeGenericType(output);
-            }
-            return output;
+                TypeName = type.FullName,
+                Type = type,
+                GraphType = graphType
+            };
+            TypeMappings.Add(typeMapping.TypeName, typeMapping);
+            return typeMapping;
         }
 
         public static bool IsGraphClass(Type type)
@@ -97,13 +107,20 @@ namespace GraphQL.Server
         public static void LoadTypes(Assembly assembly)
         {
             Assemblies[assembly.FullName] = assembly;
-            var types = assembly.ExportedTypes.Where(t => typeof(GraphType).IsAssignableFrom(t) && !ExcludedTypes.Contains(t)).ToDictionary(t => t.Name, t => t);
+            List<Type> types = new List<Type>();
+            // GraphObject
+            types.AddRange(assembly.ExportedTypes.Where(t => t.BaseType != null && t.BaseType.IsGenericType && typeof(GraphObject<>) == t.BaseType.GetGenericTypeDefinition()));
+            // GraphInputObject
+            types.AddRange(assembly.ExportedTypes.Where(t => t.BaseType != null && t.BaseType.IsGenericType && typeof(GraphInputObject<>) == t.BaseType.GetGenericTypeDefinition()));
+            // GraphEnum
+            types.AddRange(assembly.ExportedTypes.Where(t => t.BaseType != null && t.BaseType.IsGenericType && typeof(GraphEnum<>) == t.BaseType.GetGenericTypeDefinition()));
+            // GraphInterface
+            types.AddRange(assembly.ExportedTypes.Where(t => t.BaseType != null && t.BaseType.IsGenericType && typeof(GraphInterface<>) == t.BaseType.GetGenericTypeDefinition()));
             foreach (var type in types)
             {
-                if (ResourceTypes.ContainsKey(type.Key)) continue;
-                ResourceTypes.Add(type.Key, type.Value);
+                if (ExcludedTypes.Contains(type)) continue;
+                AddType(type.BaseType.GenericTypeArguments.First(), type);
             }
-            //var tmpTypes = ResourceTypes;
         }
 
         public static void LoadOperations(IContainer container, Assembly assembly, ApiSchema schema)
@@ -116,23 +133,11 @@ namespace GraphQL.Server
             }
         }
 
-        public static void InitializeTypes(IContainer container, ApiSchema schema)
+        public class TypeMapping
         {
-            schema.RegisterTypes(ResourceTypes.Values.ToArray());
-            //foreach (var type in ResourceTypes)
-            //{
-            //    var baseType = type.Value.BaseType.IsGenericType ? type.Value.BaseType.GetGenericTypeDefinition() : type.Value.BaseType;
-            //    var isGraphObject = baseType == typeof(GraphObject<>) || baseType == typeof(GraphInterface<>);
-            //    var isGraphInput = type.Value.IsGenericType && type.Value.GetGenericTypeDefinition() == typeof(GraphInputObject<>);
-            //    if (isGraphObject || isGraphInput)
-            //    {
-            //        Activator.CreateInstance(type.Value, container);
-            //    }
-            //    else
-            //    {
-            //        Activator.CreateInstance(type.Value);
-            //    }
-            //}
+            public string TypeName { get; set; }
+            public Type Type { get; set; }
+            public Type GraphType { get; set; }
         }
     }
 }

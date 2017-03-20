@@ -38,7 +38,8 @@
     <RunOctoPack>true</RunOctoPack>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GraphQL">
+    <Reference Include="GraphQL, Version=0.12.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\GraphQL.dll</HintPath>
     </Reference>
     <Reference Include="GraphQL-Parser">
@@ -63,6 +64,7 @@
     <Compile Include="Exceptions\ValidationException.cs" />
     <Compile Include="FieldMapper.cs" />
     <Compile Include="GraphArguments.cs" />
+    <Compile Include="GraphObjectMap.cs" />
     <Compile Include="IOperation.cs" />
     <Compile Include="Security\UserPermissions.cs" />
     <Compile Include="Types\GraphEnum.cs" />

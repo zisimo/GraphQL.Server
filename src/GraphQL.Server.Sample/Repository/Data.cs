@@ -8,6 +8,7 @@ namespace GraphQL.Server.Sample.Repository
     {
         private readonly List<Human> _humans = new List<Human>();
         private readonly List<Droid> _droids = new List<Droid>();
+        private readonly List<Robot> _robots = new List<Robot>();
         private int _idCounter;
 
         public Data()
@@ -42,6 +43,16 @@ namespace GraphQL.Server.Sample.Repository
                 Name = "C-3PO",
                 AppearsIn = new[] { Episodes.NEWHOPE, Episodes.EMPIRE, Episodes.JEDI },
                 PrimaryFunction = "Protocol"
+            });
+            _robots.Add(new Robot
+            {
+                Id = 1,
+                Name = "Gloo"
+            });
+            _robots.Add(new Robot
+            {
+                Id = 2,
+                Name = "Mary"
             });
         }
 
@@ -84,6 +95,11 @@ namespace GraphQL.Server.Sample.Repository
             human.Id = Math.Max(_humans.Max(h => h.Id), _droids.Max(h => h.Id)) + 1;
             _humans.Add(human);
             return human;
+        }
+
+        public Robot GetRobot(int? inputId)
+        {
+            return _robots.FirstOrDefault(r => r.Id == inputId);
         }
     }
 }

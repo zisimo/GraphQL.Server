@@ -85,5 +85,19 @@ namespace GraphQL.Server
             }
             return arguments.ToArray();
         }
+
+        public static void AddFields<TOutput>(IContainer container, ComplexGraphType<object> obj) where TOutput : class
+        {
+            var outputType = typeof(TOutput);
+            var filter = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
+            var methods = outputType.GetMethods(filter);
+            foreach (var propertyInfo in outputType.GetProperties(filter))
+            {
+                if (propertyInfo.GetMethod != null && propertyInfo.GetMethod.IsPublic)
+                {
+                    AddField(container, obj, outputType, propertyInfo, methods.FirstOrDefault(m => m.Name == $"Get{propertyInfo.Name}"));
+                }
+            }
+        }
     }
 }
