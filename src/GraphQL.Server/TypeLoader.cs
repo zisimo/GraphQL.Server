@@ -51,27 +51,31 @@ namespace GraphQL.Server
                 isList = true;
                 type = type.GenericTypeArguments[0];
             }
+            Type graphType;
             if (TypeLoader.BasicTypeMappings.ContainsKey(type))
             {
-                typeMapping = TypeLoader.BasicTypeMappings[type];
+                graphType = TypeLoader.BasicTypeMappings[type];
             }
-            else if (!TypeMappings.ContainsKey(type.FullName))
+            else
             {
-                if (type.IsEnum)
+                if (!TypeMappings.ContainsKey(type.FullName))
                 {
-                    AddType(type, typeof(GraphEnum<>).MakeGenericType(type));
+                    if (type.IsEnum)
+                    {
+                        AddType(type, typeof(GraphEnum<>).MakeGenericType(type));
+                    }
+                    else if (inputType)
+                    {
+                        AddType(type, typeof(GraphInputObject<>).MakeGenericType(type));
+                    }
+                    else
+                    {
+                        throw new GraphException($"No TypeMapping mapping found for {type.FullName}");
+                    }
                 }
-                else if (inputType)
-                {
-                    AddType(type, typeof(GraphInputObject<>).MakeGenericType(type));
-                }
-                else
-                {
-                    throw new GraphException($"No TypeMapping mapping found for {type.FullName}");
-                }
-                typeMapping = TypeMappings[type.FullName];
+                graphType = TypeMappings[type.FullName].GraphType;
             }
-            return isList ? typeof(ListGraphType<>).MakeGenericType(typeMapping.GraphType) : typeMapping.GraphType;
+            return isList ? typeof(ListGraphType<>).MakeGenericType(graphType) : graphType;
         }
 
         public static TypeMapping AddType(Type type, Type graphType)
