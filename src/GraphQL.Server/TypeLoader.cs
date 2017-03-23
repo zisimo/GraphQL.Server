@@ -51,8 +51,11 @@ namespace GraphQL.Server
                 isList = true;
                 type = type.GenericTypeArguments[0];
             }
-            if (TypeLoader.BasicTypeMappings.ContainsKey(type)) return TypeLoader.BasicTypeMappings[type];
-            if (!TypeMappings.ContainsKey(type.FullName))
+            if (TypeLoader.BasicTypeMappings.ContainsKey(type))
+            {
+                typeMapping = TypeLoader.BasicTypeMappings[type];
+            }
+            else if (!TypeMappings.ContainsKey(type.FullName))
             {
                 if (type.IsEnum)
                 {
@@ -66,8 +69,8 @@ namespace GraphQL.Server
                 {
                     throw new GraphException($"No TypeMapping mapping found for {type.FullName}");
                 }
+                typeMapping = TypeMappings[type.FullName];
             }
-            var typeMapping = TypeMappings[type.FullName];
             return isList ? typeof(ListGraphType<>).MakeGenericType(typeMapping.GraphType) : typeMapping.GraphType;
         }
 
