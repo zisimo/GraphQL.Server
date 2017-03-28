@@ -35,6 +35,15 @@ namespace GraphQL.Server
             TypeLoader.AddType(typeof(TInput), type);
         }
 
+        public void MapOutputNamespace(Assembly assembly, string ns)
+        {
+            foreach (var type in assembly.ExportedTypes.Where(t => t.Namespace == ns))
+            {
+                var graphType = typeof(GraphObjectMap<>).MakeGenericType(type);
+                TypeLoader.AddType(type, graphType);
+            }
+        }
+
         public void MapAssemblies(params Assembly[] assemblies)
         {
             var types = new List<Type>();
