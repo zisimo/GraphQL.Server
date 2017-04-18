@@ -1,10 +1,12 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using System.Web.Http;
 using GraphQL.Server.Sample.Objects;
 using GraphQL.Server.Sample.Output;
 using GraphQL.Server.Sample.Repository;
 using GraphQL.Server.Security;
 using GraphQL.Server.SimpleInjector;
+using GraphQL.Types;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -32,6 +34,11 @@ namespace GraphQL.Server.Sample
             container.RegisterSingleton<ApiSchema>(() =>
             {
                 var apiSchema = new ApiSchema(container);
+                apiSchema.AddPropertyFilter<string>((context, propertyInfo, name, value) =>
+                {
+                    Debug.WriteLine($"PropertyFilter for {name}");
+                    return value;
+                });
                 // map a type without GraphObject implementation
                 //apiSchema.MapOutput<Robot, Output.RobotOutput>();
                 apiSchema.MapOutput<RobotOutput>();

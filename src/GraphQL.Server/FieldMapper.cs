@@ -39,7 +39,8 @@ namespace GraphQL.Server
                 contextResolve = context =>
                 {
                     AuthorizeProperty(container, authFieldName);
-                    return methodInfo.Invoke(obj, GetArgumentsForMethod(methodInfo, container, context));
+                    var output = methodInfo.Invoke(obj, GetArgumentsForMethod(methodInfo, container, context));
+                    return container.GetInstance<ApiSchema>().PropertyFilterManager.Filter(context, propertyInfo, authFieldName, output);
                 };
             }
             else
@@ -51,7 +52,8 @@ namespace GraphQL.Server
                     var properties = context.Source.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
                     var sourceProp = properties.FirstOrDefault(p => p.Name == propertyInfo.Name);
                     if (sourceProp == null) throw new ArgumentException($"No matching source property found for GraphObject. Type: {type.Name} Property: {propertyInfo.Name}");
-                    return sourceProp.GetValue(context.Source);
+                    var output = sourceProp.GetValue(context.Source);
+                    return container.GetInstance<ApiSchema>().PropertyFilterManager.Filter(context, propertyInfo, authFieldName, output);
                 };
             }
             var graphType = TypeLoader.GetGraphType(fieldType);

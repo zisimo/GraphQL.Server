@@ -12,12 +12,14 @@ namespace GraphQL.Server
         public IContainer Container { get; private set; }
         public ApiOperation Query { get; private set; }
         public ApiOperation Mutation { get; private set; }
+        public PropertyFilterManager PropertyFilterManager { get; set; }
 
         public ApiSchema(IContainer container) : base(type => (GraphType)container.GetInstance(type))
         {
             Container = container;
             base.Query = Query = new ApiOperation(container, "Query");
             base.Mutation = Mutation = new ApiOperation(container, "Mutation");
+            PropertyFilterManager = new PropertyFilterManager();
         }
 
         public void MapOutput<TOutput>()
@@ -76,6 +78,11 @@ namespace GraphQL.Server
         public void Lock()
         {
             RegisterTypes(TypeLoader.TypeMappings.Values.Select(v => v.GraphType).ToArray());
+        }
+
+        public void AddPropertyFilter<T>(Func<ResolveFieldContext<object>, PropertyInfo, string, T, T> filter)
+        {
+            PropertyFilterManager.AddPropertyFilter(filter);
         }
     }
 }
