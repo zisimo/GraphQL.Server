@@ -20,12 +20,12 @@ namespace GraphQL.Server
             PropertyFilters.Add((context, propertyInfo, name, value) =>
             {
                 var filterType = typeof(T);
-                var valueType = value != null ? value.GetType() : typeof(Object);
+                var valueType = value != null ? value.GetType() : typeof(object);
                 var isArray = valueType.IsArray;
                 var isEnumerable = valueType != typeof(string) && valueType.GetInterfaces().Any(t => t.Name.Contains("IEnumerable"));
                 
                 // Direct cast
-                if (TypeCompatible(context, propertyInfo, filterType, valueType))
+                if (TypeCompatible(filterType, valueType, value))
                 {
                     value = filter(context, propertyInfo, name, (T)value);
                 }
@@ -33,7 +33,7 @@ namespace GraphQL.Server
                 else if (valueType.IsGenericType
                     && typeof(Nullable<>).IsAssignableFrom(valueType.GetGenericTypeDefinition())
                     && filterType.IsAssignableFrom(valueType.GenericTypeArguments[0])
-                    && propertyInfo.GetValue(context.Source) != null)
+                    && value != null)
                 {
                     value = filter(context, propertyInfo, name, (T)value);
                 }
@@ -42,9 +42,9 @@ namespace GraphQL.Server
                 {
                     var baseType = isArray ? valueType.GetElementType() : valueType.GenericTypeArguments[0];
 
-                    if (TypeCompatible(context, propertyInfo, filterType, baseType))
+                    if (TypeCompatible(filterType, baseType, value))
                     {
-                        var extensionList = propertyInfo.GetValue(context.Source) as IEnumerable<object>;
+                        var extensionList = value as IEnumerable<object>;
                         foreach (var o in extensionList)
                         {
                             value = filter(context, propertyInfo, name, (T) o);
@@ -55,7 +55,7 @@ namespace GraphQL.Server
             });
         }
 
-        private bool TypeCompatible(ResolveFieldContext<object> context, PropertyInfo propertyInfo, Type filterType, Type valueType)
+        private bool TypeCompatible(Type filterType, Type valueType, object value)
         {
             // Direct
             if (filterType.IsAssignableFrom(valueType)) return true;
@@ -63,7 +63,7 @@ namespace GraphQL.Server
             if (filterType.IsGenericType
                 && typeof(Nullable<>).IsAssignableFrom(valueType.GetGenericTypeDefinition())
                 && filterType.IsAssignableFrom(valueType.GenericTypeArguments[0])
-                && propertyInfo.GetValue(context.Source) != null) return true;
+                && value != null) return true;
             return false;
         }
 
