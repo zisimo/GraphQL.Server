@@ -20,7 +20,7 @@ namespace GraphQL.Server
             PropertyFilters.Add((context, propertyInfo, name, value) =>
             {
                 var filterType = typeof(T);
-                var valueType = value.GetType();
+                var valueType = value != null ? value.GetType() : typeof(Object);
                 var isArray = valueType.IsArray;
                 var isEnumerable = valueType != typeof(string) && valueType.GetInterfaces().Any(t => t.Name.Contains("IEnumerable"));
                 
