@@ -44,11 +44,15 @@ namespace GraphQL.Server
 
                     if (TypeCompatible(filterType, baseType, value))
                     {
-                        var extensionList = value as IEnumerable<object>;
-                        foreach (var o in extensionList)
+                        var readList = value as IEnumerable<object>;
+                        var listType = typeof(List<>).MakeGenericType(baseType);
+                        var writeList = Activator.CreateInstance(listType);
+                        foreach (var o in readList)
                         {
-                            value = filter(context, propertyInfo, name, (T) o);
+                            var item = (object) filter(context, propertyInfo, name, (T) o);
+                            listType.GetMethod("Add").Invoke(writeList, new[] { item });
                         }
+                        value = (IEnumerable<T>)writeList;
                     }
                 }
                 return value;
