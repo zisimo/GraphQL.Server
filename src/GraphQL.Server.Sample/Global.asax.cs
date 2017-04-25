@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Web.Http;
 using GraphQL.Server.Sample.Objects;
@@ -38,6 +39,15 @@ namespace GraphQL.Server.Sample
                 {
                     Debug.WriteLine($"PropertyFilter for {name}");
                     return value;
+                });
+                apiSchema.AddPropertyFilter<Uri>((context, propertyInfo, name, value) =>
+                {
+                    Debug.WriteLine($"Replacing host for Uri {value}");
+                    var builder = new UriBuilder(value)
+                    {
+                        Host = "www.replacement.com"
+                    };
+                    return builder.Uri;
                 });
                 // map a type without GraphObject implementation
                 //apiSchema.MapOutput<Robot, Output.RobotOutput>();

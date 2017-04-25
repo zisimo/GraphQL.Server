@@ -9,6 +9,7 @@ namespace GraphQL.Server.Sample.Repository
         private readonly List<Human> _humans = new List<Human>();
         private readonly List<Droid> _droids = new List<Droid>();
         private readonly List<Robot> _robots = new List<Robot>();
+        private readonly List<Test> _tests = new List<Test>();
         private int _idCounter;
 
         public Data()
@@ -53,6 +54,11 @@ namespace GraphQL.Server.Sample.Repository
             {
                 Id = 2,
                 Name = "Mary"
+            });
+            _tests.Add(new Test
+            {
+                Id = 1,
+                UriString = "http://www.test.com/image.jpg"
             });
         }
 
@@ -100,6 +106,11 @@ namespace GraphQL.Server.Sample.Repository
         public Robot GetRobot(int? inputId)
         {
             return _robots.FirstOrDefault(r => r.Id == inputId);
+        }
+
+        public Test GetTest(int? id)
+        {
+            return _tests.FirstOrDefault(r => r.Id == id);
         }
     }
 }

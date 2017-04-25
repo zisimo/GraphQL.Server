@@ -32,6 +32,7 @@ namespace GraphQL.Server
             { typeof(int), typeof(IntGraphType) },
             { typeof(DateTime), typeof(DateGraphType) },
             { typeof(Guid), typeof(Types.GuidGraphType) },
+            { typeof(Uri), typeof(Types.UriGraphType) },
             { typeof(long), typeof(Types.LongGraphType) },
             { typeof(double), typeof(Types.DoubleGraphType) },
             { typeof(decimal), typeof(DecimalGraphType) }
