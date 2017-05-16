@@ -7,6 +7,7 @@ namespace GraphQL.Server.Sample.Objects
     {
         public int Id { get; set; }
         public Uri UriString { get; set; }
+        public string ExtraParams { get; set; }
 
         public TestObject(IContainer container) : base(container)
         {
@@ -15,6 +16,11 @@ namespace GraphQL.Server.Sample.Objects
         public Uri GetUriString(Test test)
         {
             return new Uri(test.UriString);
+        }
+
+        public string GetExtraParams(Test test, Guid id)
+        {
+            return $"Extra[{id}]";
         }
     }
 }

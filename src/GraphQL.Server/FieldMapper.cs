@@ -31,15 +31,18 @@ namespace GraphQL.Server
             var fieldName = StringExtensions.PascalCase(propertyInfo.Name);
             var fieldDescription = "";
             var authFieldName = $"{type.FullName}.{propertyInfo.Name}";
+            var sourceType = type.BaseType?.GenericTypeArguments.FirstOrDefault();
+            QueryArguments arguments = null;
 
             Func<ResolveFieldContext<object>, object> contextResolve;
             if (methodInfo != null)
             {
+                arguments = GetPropertyArguments(sourceType, methodInfo);
                 // Custom mapping of property
                 contextResolve = context =>
                 {
                     AuthorizeProperty(container, authFieldName);
-                    var output = methodInfo.Invoke(obj, GetArgumentsForMethod(methodInfo, container, context));
+                    var output = methodInfo.Invoke(obj, GetArgumentValues(methodInfo, container, context));
                     return container.GetInstance<ApiSchema>().PropertyFilterManager.Filter(context, propertyInfo, authFieldName, output);
                 };
             }
@@ -62,9 +65,36 @@ namespace GraphQL.Server
             {
                 graphType = typeof(NonNullGraphType<>).MakeGenericType(graphType);
             }
-            var field = obj.Field(graphType, fieldName, fieldDescription, null, contextResolve);
+            var field = obj.Field(graphType, fieldName, fieldDescription, arguments, contextResolve);
             //field.ResolvedType = (IGraphType)Activator.CreateInstance(graphType);
             container.GetInstance<AuthorizationMap>().AddAuthorization(type, propertyInfo);
+        }
+        
+        private static QueryArguments GetPropertyArguments(Type sourceType, MethodInfo methodInfo)
+        {
+            var args = new List<QueryArgument>();
+            foreach (var parameterInfo in methodInfo.GetParameters())
+            {
+                if (parameterInfo.ParameterType.IsAssignableFrom(sourceType)
+                    || parameterInfo.ParameterType.IsAssignableFrom(typeof(IContainer))) continue;
+                var parameterGraphType = TypeLoader.GetGraphType(parameterInfo.ParameterType);
+                object defaultValue = null;
+                if (parameterInfo.HasDefaultValue)
+                {
+                    defaultValue = parameterInfo.DefaultValue;
+                }
+                else
+                {
+                    parameterGraphType = typeof(NonNullGraphType<>).MakeGenericType(parameterGraphType);
+                }
+                var argument = new QueryArgument(parameterGraphType)
+                {
+                    Name = StringExtensions.PascalCase(parameterInfo.Name),
+                    DefaultValue = defaultValue
+                };
+                args.Add(argument);
+            }
+            return args.Count > 0 ? new QueryArguments(args) : null;
         }
 
         private static void AuthorizeProperty(IContainer container, string authFieldName)
@@ -76,7 +106,7 @@ namespace GraphQL.Server
             }
         }
 
-        private static object[] GetArgumentsForMethod(MethodInfo methodInfo, IContainer container, ResolveFieldContext<object> context)
+        private static object[] GetArgumentValues(MethodInfo methodInfo, IContainer container, ResolveFieldContext<object> context)
         {
             var arguments = new List<object>();
             var sourceType = context.Source.GetType();
@@ -84,7 +114,12 @@ namespace GraphQL.Server
             {
                 if (parameterInfo.ParameterType == typeof(IContainer)) arguments.Add(container);
                 else if (parameterInfo.ParameterType.IsAssignableFrom(sourceType)) arguments.Add(context.Source);
-                else arguments.Add(null);
+                else
+                {
+                    var argName = StringExtensions.PascalCase(parameterInfo.Name);
+                    var argValue = context.Arguments.ContainsKey(argName) ? context.Arguments[argName] : null;
+                    arguments.Add(argValue);
+                }
             }
             return arguments.ToArray();
         }
