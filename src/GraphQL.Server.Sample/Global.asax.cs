@@ -49,6 +49,11 @@ namespace GraphQL.Server.Sample
                     };
                     return builder.Uri;
                 });
+                apiSchema.AddPropertyFilter((context, propertyInfo, name, value) =>
+                {
+                    Debug.WriteLine($"Generic property filter");
+                    return value;
+                });
                 // map a type without GraphObject implementation
                 //apiSchema.MapOutput<Robot, Output.RobotOutput>();
                 apiSchema.MapOutput<RobotOutput>();

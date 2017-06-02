@@ -15,6 +15,11 @@ namespace GraphQL.Server
             PropertyFilters = new List<Func<ResolveFieldContext<object>, PropertyInfo, string, object, object>>();
         }
 
+        public void AddPropertyFilter(Func<ResolveFieldContext<object>, PropertyInfo, string, object, object> filter)
+        {
+            PropertyFilters.Add(filter);
+        }
+
         public void AddPropertyFilter<T>(Func<ResolveFieldContext<object>, PropertyInfo, string, T, T> filter)
         {
             PropertyFilters.Add((context, propertyInfo, name, value) =>
