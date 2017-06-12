@@ -31,7 +31,7 @@ namespace GraphQL.Server
             var fieldName = StringExtensions.PascalCase(propertyInfo.Name);
             var fieldDescription = "";
             var authFieldName = $"{type.FullName}.{propertyInfo.Name}";
-            var sourceType = type.BaseType?.GenericTypeArguments.FirstOrDefault();
+            var sourceType = type.BaseType?.GenericTypeArguments.FirstOrDefault() ?? type;
             QueryArguments arguments = null;
 
             Func<ResolveFieldContext<object>, object> contextResolve;
@@ -128,7 +128,7 @@ namespace GraphQL.Server
         {
             var outputType = typeof(TOutput);
             var filter = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
-            var methods = outputType.GetMethods(filter);
+            var methods = obj.GetType().GetMethods(filter);
             foreach (var propertyInfo in outputType.GetProperties(filter))
             {
                 if (propertyInfo.GetMethod != null && propertyInfo.GetMethod.IsPublic)

@@ -10,6 +10,7 @@ namespace GraphQL.Server.Sample.Repository
         private readonly List<Droid> _droids = new List<Droid>();
         private readonly List<Robot> _robots = new List<Robot>();
         private readonly List<Test> _tests = new List<Test>();
+        private readonly List<Lego> _legos = new List<Lego>();
         private int _idCounter;
 
         public Data()
@@ -59,6 +60,16 @@ namespace GraphQL.Server.Sample.Repository
             {
                 Id = 1,
                 UriString = "http://www.test.com/image.jpg"
+            });
+            _legos.Add(new Lego
+            {
+                Color = "Blue",
+                Id = 1
+            });
+            _legos.Add(new Lego
+            {
+                Color = "Red",
+                Id = 2
             });
         }
 
@@ -111,6 +122,11 @@ namespace GraphQL.Server.Sample.Repository
         public Test GetTest(int? id)
         {
             return _tests.FirstOrDefault(r => r.Id == id);
+        }
+
+        public Lego GetLego(int? id)
+        {
+            return _legos.FirstOrDefault(l => l.Id == id);
         }
     }
 }

@@ -54,6 +54,8 @@ namespace GraphQL.Server
             {
                 // GraphObject
                 types.AddRange(assembly.ExportedTypes.Where(t => t.BaseType != null && t.BaseType.IsGenericType && typeof(GraphObject<>) == t.BaseType.GetGenericTypeDefinition()));
+                // GraphObjectMap
+                types.AddRange(assembly.ExportedTypes.Where(t => t.BaseType != null && t.BaseType.IsGenericType && typeof(GraphObjectMap<>) == t.BaseType.GetGenericTypeDefinition()));
                 // GraphInputObject
                 types.AddRange(assembly.ExportedTypes.Where(t => t.BaseType != null && t.BaseType.IsGenericType && typeof(GraphInputObject<>) == t.BaseType.GetGenericTypeDefinition()));
                 // GraphEnum

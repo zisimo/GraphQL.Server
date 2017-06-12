@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Web.Http;
+using GraphQL.Server.Sample.Maps;
 using GraphQL.Server.Sample.Objects;
 using GraphQL.Server.Sample.Output;
 using GraphQL.Server.Sample.Repository;
@@ -57,6 +58,9 @@ namespace GraphQL.Server.Sample
                 // map a type without GraphObject implementation
                 //apiSchema.MapOutput<Robot, Output.RobotOutput>();
                 apiSchema.MapOutput<RobotOutput>();
+
+                // map a type with a type mapping
+                apiSchema.MapOutput<Lego, LegoMap>();
 
                 // map an operation without IOperation implementation
                 //apiSchema.MapOperation
