@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using GraphQL.Client;
@@ -23,6 +24,8 @@ namespace GraphQL.Server.Operation
             var methods = typeof(T).GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public);
             foreach (var methodInfo in methods)
             {
+                if (methodInfo.Name == nameof(IOperation.Register)) continue;
+
                 var isQuery = Enumerable.Any(methodInfo.CustomAttributes, a => a.AttributeType == typeof(QueryAttribute));
                 var isMutation = Enumerable.Any(methodInfo.CustomAttributes, a => a.AttributeType == typeof(MutationAttribute));
                 if (!isQuery && !isMutation)
@@ -40,6 +43,7 @@ namespace GraphQL.Server.Operation
                 var fieldDescription = "";
                 var queryArguments = GraphArguments.FromModel(parameters[0].ParameterType).GetQueryArguments();
                 // Add function as operation
+                schema.MapOutput(methodInfo.ReturnType);
                 var graphType = TypeLoader.GetGraphType(methodInfo.ReturnType);
                 apiOperation.Field(graphType, fieldName, fieldDescription, queryArguments, context =>
                 {
@@ -49,13 +53,12 @@ namespace GraphQL.Server.Operation
                     var output = isQuery ? graphClient.RunQuery(fieldName, inputModel, outputModel) : graphClient.RunMutation(fieldName, inputModel, outputModel);
                     return output;
                 });
-                //AddQuery(methodInfo.Name, parameters[0].ParameterType, methodInfo.ReturnType, function);
             }
         }
 
-        private Dictionary<string, object> GetOutputModel(IEnumerable<Field> selections)
+        private dynamic GetOutputModel(IEnumerable<Field> selections)
         {
-            var output = new Dictionary<string, object>();
+            IDictionary<string, object> output = new ExpandoObject();
             foreach (var selection in selections)
             {
                 var name = $"{selection.Name}";
@@ -64,6 +67,7 @@ namespace GraphQL.Server.Operation
                     var arguments = selection.Arguments.Select(a => $"{a.Name}:{JsonConvert.SerializeObject(a.Value)}");
                     name = $"{name}({string.Join(",", arguments)})";
                 }
+                //output.Add(name, GetOutputModel(selection.SelectionSet.Selections.OfType<Field>()));
                 output[name] = GetOutputModel(selection.SelectionSet.Selections.OfType<Field>());
             }
             return output;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
@@ -32,7 +33,12 @@ namespace GraphQL.Client
         private string GetFieldsForType(Type type)
         {
             if (type.IsArray) return GetFieldsForType(type.GetElementType());
-            if (type != typeof(string) && type.GetInterfaces().Any(t => t.Name.Contains("IEnumerable"))) return GetFieldsForType(type.GenericTypeArguments[0]);
+            if (type != typeof(string) &&
+                type.GetInterfaces().Any(t => t.Name.Contains("IEnumerable")) &&
+                type.GenericTypeArguments.Length > 0)
+            {
+                return GetFieldsForType(type.GenericTypeArguments[0]);
+            }
             var fields = new List<string>();
             foreach (var propertyInfo in type.GetProperties())
             {

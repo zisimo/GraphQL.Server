@@ -12,23 +12,43 @@ namespace GraphQL.Server
     public class ApiSchema : Schema
     {
         public IContainer Container { get; private set; }
-        public ApiOperation Query { get; private set; }
-        public ApiOperation Mutation { get; private set; }
+
+        public ApiOperation Query
+        {
+            get
+            {
+                if (base.Query == null) base.Query = new ApiOperation(Container, "Query");
+                return (ApiOperation)base.Query;
+            }
+        }
+
+        public ApiOperation Mutation
+        {
+            get
+            {
+                if (base.Mutation == null) base.Mutation = new ApiOperation(Container, "Mutation");
+                return (ApiOperation)base.Mutation;
+            }
+        }
+
         public PropertyFilterManager PropertyFilterManager { get; set; }
 
         public ApiSchema(IContainer container) : base(type => (GraphType)container.GetInstance(type))
         {
             Container = container;
-            base.Query = Query = new ApiOperation(container, "Query");
-            base.Mutation = Mutation = new ApiOperation(container, "Mutation");
             PropertyFilterManager = new PropertyFilterManager();
+        }
+
+        public void MapOutput(Type outputType)
+        {
+            var type = typeof(GraphObjectMap<>).MakeGenericType(outputType);
+            TypeLoader.AddType(outputType, type);
         }
 
         public void MapOutput<TOutput>()
             where TOutput : class
         {
-            var type = typeof(GraphObjectMap<>).MakeGenericType(typeof(TOutput));
-            TypeLoader.AddType(typeof(TOutput), type);
+            MapOutput(typeof(TOutput));
         }
 
         public void MapOutput<TInput, TOutput>()
@@ -98,6 +118,23 @@ namespace GraphQL.Server
         public void Proxy<T>(Func<GraphClient<T>> getGraphClient) where T : class, IOperation
         {
             new ProxyOperation<T>(getGraphClient).Register(this);
+        }
+
+        public void MapOperation<TOperation>() where TOperation : IOperation
+        {
+            var type = typeof(TOperation);
+            var methods = type.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public);
+            foreach (var methodInfo in methods)
+            {
+                if (methodInfo.IsSpecialName ||
+                    methodInfo.Name == nameof(IOperation.Register) ||
+                    methodInfo.ReturnType == typeof(void) ||
+                    methodInfo.GetParameters().Length != 1) continue;
+
+                MapOutput(methodInfo.ReturnType);
+            }
+            var operation = (IOperation)Container.GetInstance(type);
+            operation.Register(this);
         }
     }
 }

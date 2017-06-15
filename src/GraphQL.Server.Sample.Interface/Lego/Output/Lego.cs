@@ -1,4 +1,4 @@
-﻿namespace GraphQL.Server.Sample.Repository
+﻿namespace GraphQL.Server.Sample.Interface.Lego.Output
 {
     public class Lego
     {
