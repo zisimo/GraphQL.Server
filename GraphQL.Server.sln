@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Files", "Files", "{0B8CC7C2-16D1-4D48-87AB-A3DECB2E937F}"
 	ProjectSection(SolutionItems) = preProject
@@ -22,6 +22,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphQL.Server.Test", "test\GraphQL.Server.Test\GraphQL.Server.Test.csproj", "{C9A99D5E-6E4E-440B-9096-9A77C4456022}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphQL.Server.Sample", "src\GraphQL.Server.Sample\GraphQL.Server.Sample.csproj", "{5F12F18B-4C7B-434C-A083-8BB9CF78B3BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphQL.Client", "src\GraphQL.Client\GraphQL.Client.csproj", "{2680DF57-B724-4680-83FB-C1159841E08A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphQL.Client.Test", "test\GraphQL.Client.Test\GraphQL.Client.Test.csproj", "{7E4B4504-B43A-4739-BEDB-1E530A939438}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,11 +49,20 @@ Global
 		{5F12F18B-4C7B-434C-A083-8BB9CF78B3BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5F12F18B-4C7B-434C-A083-8BB9CF78B3BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5F12F18B-4C7B-434C-A083-8BB9CF78B3BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2680DF57-B724-4680-83FB-C1159841E08A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2680DF57-B724-4680-83FB-C1159841E08A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2680DF57-B724-4680-83FB-C1159841E08A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2680DF57-B724-4680-83FB-C1159841E08A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E4B4504-B43A-4739-BEDB-1E530A939438}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E4B4504-B43A-4739-BEDB-1E530A939438}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E4B4504-B43A-4739-BEDB-1E530A939438}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E4B4504-B43A-4739-BEDB-1E530A939438}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C9A99D5E-6E4E-440B-9096-9A77C4456022} = {586DF059-5E72-4162-B713-E4122E0CF17F}
+		{7E4B4504-B43A-4739-BEDB-1E530A939438} = {586DF059-5E72-4162-B713-E4122E0CF17F}
 	EndGlobalSection
 EndGlobal

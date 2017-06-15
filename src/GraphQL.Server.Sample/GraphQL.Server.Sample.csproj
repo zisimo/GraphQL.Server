@@ -15,7 +15,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>GraphQL.Server.Sample</RootNamespace>
     <AssemblyName>GraphQL.Server.Sample</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
@@ -24,6 +24,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -43,6 +44,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CacheManager.Core, Version=1.0.1.0, Culture=neutral, PublicKeyToken=5b450b4fb65c4cdb" />
     <Reference Include="GraphQL, Version=0.12.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\GraphQL.dll</HintPath>
@@ -71,18 +73,20 @@
       <HintPath>..\..\packages\SimpleInjector.Integration.WebApi.4.0.0-beta2\lib\net45\SimpleInjector.Integration.WebApi.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web" />
     <Reference Include="System.Configuration" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
       <Private>True</Private>
@@ -92,6 +96,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Web.Services" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />
@@ -125,6 +130,7 @@
     <Compile Include="Operations\TestOperations.cs" />
     <Compile Include="Operations\AllOperations.cs" />
     <Compile Include="Operations\RobotOperation.cs" />
+    <Compile Include="Operations\LegoServiceOperation.cs" />
     <Compile Include="Repository\Lego.cs" />
     <Compile Include="Output\RobotOutput.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -145,6 +151,10 @@
     <ProjectReference Include="..\..\src\GraphQL.Server\GraphQL.Server.csproj">
       <Project>{4bae5451-1fd2-4514-b5c4-0663e5d7d967}</Project>
       <Name>GraphQL.Server</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GraphQL.Client\GraphQL.Client.csproj">
+      <Project>{2680df57-b724-4680-83fb-c1159841e08a}</Project>
+      <Name>GraphQL.Client</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

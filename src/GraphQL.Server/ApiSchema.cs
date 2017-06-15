@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using GraphQL.Client;
+using GraphQL.Server.Operation;
 using GraphQL.Server.Types;
 using GraphQL.Types;
 
@@ -72,6 +74,7 @@ namespace GraphQL.Server
             }
             foreach (var type in operationTypes)
             {
+                if (!Container.HasRegistration(type)) continue;
                 var operation = (IOperation)Container.GetInstance(type);
                 operation.Register(this);
             }
@@ -90,6 +93,11 @@ namespace GraphQL.Server
         public void AddPropertyFilter<T>(Func<ResolveFieldContext<object>, PropertyInfo, string, T, T> filter)
         {
             PropertyFilterManager.AddPropertyFilter(filter);
+        }
+
+        public void Proxy<T>(Func<GraphClient<T>> getGraphClient) where T : class, IOperation
+        {
+            new ProxyOperation<T>(getGraphClient).Register(this);
         }
     }
 }

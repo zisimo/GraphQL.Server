@@ -1,4 +1,4 @@
-﻿namespace GraphQL.Server
+﻿namespace GraphQL.Server.Operation
 {
     public interface IOperation
     {

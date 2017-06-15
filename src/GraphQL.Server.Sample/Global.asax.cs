@@ -2,8 +2,10 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Web.Http;
+using GraphQL.Client;
 using GraphQL.Server.Sample.Maps;
 using GraphQL.Server.Sample.Objects;
+using GraphQL.Server.Sample.Operations;
 using GraphQL.Server.Sample.Output;
 using GraphQL.Server.Sample.Repository;
 using GraphQL.Server.Security;
@@ -63,7 +65,7 @@ namespace GraphQL.Server.Sample
                 apiSchema.MapOutput<Lego, LegoMap>();
 
                 // map an operation without IOperation implementation
-                //apiSchema.MapOperation
+                apiSchema.Proxy<ILegoServiceOperation>(() => new GraphClient<ILegoServiceOperation>("http://localhost:51436/api", new System.Net.Http.HttpClient()));
 
                 apiSchema.MapAssemblies(Assembly.GetAssembly(typeof(HumanObject)));
                 apiSchema.Lock();

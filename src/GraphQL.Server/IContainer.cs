@@ -15,5 +15,6 @@ namespace GraphQL.Server
             where TService : class
             where TImplementation : class, TService;
 
+        bool HasRegistration(Type type);
     }
 }

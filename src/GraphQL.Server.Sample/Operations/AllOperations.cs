@@ -1,5 +1,6 @@
 ﻿using GraphQL.Server.Exceptions;
 using System.ComponentModel.DataAnnotations;
+using GraphQL.Server.Operation;
 using GraphQL.Server.Sample.Objects;
 using GraphQL.Server.Sample.Output;
 using GraphQL.Server.Sample.Repository;

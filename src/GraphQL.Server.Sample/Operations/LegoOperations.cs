@@ -1,4 +1,5 @@
 ﻿using GraphQL.Server.Exceptions;
+using GraphQL.Server.Operation;
 using GraphQL.Server.Sample.Repository;
 
 namespace GraphQL.Server.Sample.Operations

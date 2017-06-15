@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using GraphQL.Language.AST;
 using GraphQL.Types;
 using GraphQL.Server.Security;
@@ -19,30 +20,43 @@ namespace GraphQL.Server
             where TOutput : class
             where TInput : class, new()
         {
-            var fieldName = StringExtensions.PascalCase(function.Method.Name);
+            var wrappingFunction = new Func<object, object>(input => function((TInput) input));
+            AddQuery(function.Method.Name, typeof(TInput), typeof(TOutput), wrappingFunction);
+        }
+
+        public void AddQuery(string fieldName, Type inputType, Type outputType, Func<object, object> function)
+        {
+            fieldName = StringExtensions.PascalCase(fieldName);
             var fieldDescription = "";
-            var arguments = GraphArguments.FromModel<TInput>();
+            var arguments = GraphArguments.FromModel(inputType);
             var queryArguments = arguments.GetQueryArguments();
             // Add function as operation
-            var graphType = TypeLoader.GetGraphType(typeof(TOutput));
+            var graphType = TypeLoader.GetGraphType(outputType);
             Field(graphType, fieldName, fieldDescription, queryArguments, context =>
             {
-                var values = new Dictionary<string, object>();
-                if (context.FieldAst.Arguments != null)
-                {
-                    var astArgs = context.FieldAst.Arguments.Children.OfType<Argument>().ToDictionary(a => a.Name, a => a.Value);
-                    foreach (var argument in arguments)
-                    {
-                        if (!astArgs.ContainsKey(argument.Value.Name)) continue;
-                        var jsonString = JsonConvert.SerializeObject(context.Arguments[argument.Value.Name]);
-                        values[argument.Value.Name] = JsonConvert.DeserializeObject(jsonString, argument.Value.Type);
-                    }
-                }
-                var valuesJson = JsonConvert.SerializeObject(values);
-                var inputModel = JsonConvert.DeserializeObject<TInput>(valuesJson);
+                var inputModel = GetInputFromContext(context, inputType);
                 ValidationError.ValidateObject(inputModel);
+                
                 return function.Invoke(inputModel);
             });
+        }
+
+        public static object GetInputFromContext(ResolveFieldContext<object> context, Type inputType)
+        {
+            var values = new Dictionary<string, object>();
+            if (context.FieldAst.Arguments != null)
+            {
+                var arguments = GraphArguments.FromModel(inputType);
+                var astArgs = context.FieldAst.Arguments.Children.OfType<Argument>().ToDictionary(a => a.Name, a => a.Value);
+                foreach (var argument in arguments)
+                {
+                    if (!astArgs.ContainsKey(argument.Value.Name)) continue;
+                    var jsonString = JsonConvert.SerializeObject(context.Arguments[argument.Value.Name]);
+                    values[argument.Value.Name] = JsonConvert.DeserializeObject(jsonString, argument.Value.Type);
+                }
+            }
+            var valuesJson = JsonConvert.SerializeObject(values);
+            return JsonConvert.DeserializeObject(valuesJson, inputType);
         }
 
         public void AddQuery<TOutputObject, TInput>(Func<TInput, InputField[], object> function)

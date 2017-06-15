@@ -9,11 +9,10 @@ namespace GraphQL.Server
 {
     public class GraphArguments : Dictionary<string, GraphArgument>
     {
-        public static GraphArguments FromModel<TInput>()
-            where TInput : class, new()
+        public static GraphArguments FromModel(Type modelType)
         {
             var arguments = new GraphArguments();
-            foreach (var propertyInfo in typeof(TInput).GetProperties(BindingFlags.Instance | BindingFlags.Public))
+            foreach (var propertyInfo in modelType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
             {
                 var fieldName = char.ToLower(propertyInfo.Name[0]) + propertyInfo.Name.Substring(1);
                 if (arguments.ContainsKey(fieldName)) continue;
@@ -32,6 +31,12 @@ namespace GraphQL.Server
                 LoadChildGraphTypes(propertyInfo.PropertyType);
             }
             return arguments;
+        }
+
+        public static GraphArguments FromModel<TInput>()
+            where TInput : class, new()
+        {
+            return FromModel(typeof(TInput));
         }
 
         public QueryArguments GetQueryArguments()
