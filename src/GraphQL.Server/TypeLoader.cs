@@ -40,18 +40,8 @@ namespace GraphQL.Server
 
         public static Type GetGraphType(Type type, bool inputType = false)
         {
-            var isList = false;
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>)) type = type.GenericTypeArguments[0];
-            if (type.IsArray)
-            {
-                isList = true;
-                type = type.GetElementType();
-            }
-            if (type != typeof(string) && type.GetInterfaces().Any(t => t.Name.Contains("IEnumerable")))
-            {
-                isList = true;
-                type = type.GenericTypeArguments[0];
-            }
+            type = GetBaseType(type, out bool isList);
+
             Type graphType;
             if (TypeLoader.BasicTypeMappings.ContainsKey(type))
             {
@@ -88,9 +78,26 @@ namespace GraphQL.Server
                 Type = type,
                 GraphType = graphType
             };
-            //TypeMappings.Add(typeMapping.TypeName, typeMapping);
             TypeMappings[typeMapping.TypeName] = typeMapping;
             return typeMapping;
+        }
+
+        public static Type GetBaseType(Type type, out bool isList)
+        {
+            isList = false;
+            var baseType = type;
+            if (baseType.IsGenericType && baseType.GetGenericTypeDefinition() == typeof(Nullable<>)) baseType = baseType.GenericTypeArguments[0];
+            if (baseType.IsArray)
+            {
+                isList = true;
+                baseType = baseType.GetElementType();
+            }
+            if (baseType != typeof(string) && baseType.GetInterfaces().Any(t => t.Name.Contains("IEnumerable")))
+            {
+                isList = true;
+                baseType = baseType.GenericTypeArguments[0];
+            }
+            return baseType;
         }
 
         public class TypeMapping
@@ -98,6 +105,11 @@ namespace GraphQL.Server
             public string TypeName { get; set; }
             public Type Type { get; set; }
             public Type GraphType { get; set; }
+        }
+
+        public static bool TypeLoaded(Type type)
+        {
+            return TypeLoader.BasicTypeMappings.ContainsKey(type) || TypeMappings.ContainsKey(type.FullName);
         }
     }
 }

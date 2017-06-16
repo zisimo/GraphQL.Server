@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using GraphQL.Client;
+using GraphQL.Server.Exceptions;
 using GraphQL.Server.Operation;
 using GraphQL.Server.Types;
 using GraphQL.Types;
@@ -41,8 +42,20 @@ namespace GraphQL.Server
 
         public void MapOutput(Type outputType)
         {
+            outputType = TypeLoader.GetBaseType(outputType, out bool isList);
+            if (outputType.IsEnum || TypeLoader.TypeLoaded(outputType)) return; //Enums are loaded automatically
+
             var type = typeof(GraphObjectMap<>).MakeGenericType(outputType);
             TypeLoader.AddType(outputType, type);
+
+            var filter = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
+            foreach (var propertyInfo in outputType.GetProperties(filter))
+            {
+                if (propertyInfo.GetMethod != null && propertyInfo.GetMethod.IsPublic)
+                {
+                    MapOutput(propertyInfo.PropertyType);
+                }
+            }
         }
 
         public void MapOutput<TOutput>()
@@ -115,16 +128,16 @@ namespace GraphQL.Server
             PropertyFilterManager.AddPropertyFilter(filter);
         }
 
-        public ProxyOperation<T> Proxy<T>(Func<GraphClient<T>> getGraphClient) where T : class, IOperation
+        public ProxyOperation<T> Proxy<T>(Func<GraphClient> getGraphClient) where T : class
         {
             var proxy = new ProxyOperation<T>(getGraphClient);
             proxy.Register(this);
             return proxy;
         }
 
-        public void MapOperation<TOperation>() where TOperation : IOperation
+        public void MapOperation<TInterface>()
         {
-            var type = typeof(TOperation);
+            var type = typeof(TInterface);
             var methods = type.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public);
             foreach (var methodInfo in methods)
             {
@@ -134,6 +147,11 @@ namespace GraphQL.Server
                     methodInfo.GetParameters().Length != 1) continue;
 
                 MapOutput(methodInfo.ReturnType);
+            }
+            var instance = Container.GetInstance(type);
+            if (!(instance is IOperation))
+            {
+                throw new GraphException($"The implementation of interface {type.Name} needs to implement interface {nameof(IOperation)}");
             }
             var operation = (IOperation)Container.GetInstance(type);
             operation.Register(this);

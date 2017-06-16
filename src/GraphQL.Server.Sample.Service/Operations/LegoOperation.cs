@@ -1,11 +1,12 @@
 ﻿using GraphQL.Server.Exceptions;
+using GraphQL.Server.Operation;
 using GraphQL.Server.Sample.Interface.Lego;
 using GraphQL.Server.Sample.Interface.Lego.Output;
 using GraphQL.Server.Sample.Service.Repository;
 
 namespace GraphQL.Server.Sample.Service.Operations
 {
-    public class LegoOperation : ILegoOperation
+    public class LegoOperation : ILegoOperation, IOperation
     {
         public IContainer Container { get; set; }
 

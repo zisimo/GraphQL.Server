@@ -64,14 +64,14 @@ namespace GraphQL.Client
             Queries.Add(query);
             return query;
         }
-        public GraphQuery<JObject> AddSelectionQuery<TInput>(string operation, TInput input, IEnumerable<Field> selections)
+        public GraphQuery<JToken> AddSelectionQuery<TInput>(string operation, TInput input, IEnumerable<Field> selections)
         {
             if (input != null)
             {
                 var inputString = GetInputString(input);
                 operation = string.IsNullOrEmpty(inputString) ? $"{operation}" : $"{operation}({inputString})";
             }
-            var query = new GraphQuery<JObject>(operation, selections);
+            var query = new GraphQuery<JToken>(operation, selections);
             Queries.Add(query);
             return query;
         }

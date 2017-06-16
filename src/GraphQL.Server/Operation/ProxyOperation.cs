@@ -7,16 +7,17 @@ using GraphQL.Client;
 using GraphQL.Language.AST;
 using GraphQL.Server.Exceptions;
 using GraphQL.Types;
+using Newtonsoft.Json;
 
 namespace GraphQL.Server.Operation
 {
-    public class ProxyOperation<TInterface> : IOperation where TInterface : class, IOperation
+    public class ProxyOperation<TInterface> : IOperation where TInterface : class
     {
         public string Url { get; private set; }
-        private Func<GraphClient<TInterface>> GetGraphClient { get; set; }
+        private Func<GraphClient> GetGraphClient { get; set; }
         public Dictionary<string, Func<ResolveFieldContext<object>, string, object, object>> PostOperations { get; set; }
 
-        public ProxyOperation(Func<GraphClient<TInterface>> getGraphClient)
+        public ProxyOperation(Func<GraphClient> getGraphClient)
         {
             GetGraphClient = getGraphClient;
             PostOperations = new Dictionary<string, Func<ResolveFieldContext<object>, string, object, object>>();
@@ -45,20 +46,18 @@ namespace GraphQL.Server.Operation
                 var fieldDescription = "";
                 var queryArguments = GraphArguments.FromModel(parameters[0].ParameterType).GetQueryArguments();
                 // Add function as operation
-                schema.MapOutput(methodInfo.ReturnType);
+                var returnType = TypeLoader.GetBaseType(methodInfo.ReturnType, out bool isList);
+                schema.MapOutput(returnType);
                 var graphType = TypeLoader.GetGraphType(methodInfo.ReturnType);
                 apiOperation.Field(graphType, fieldName, fieldDescription, queryArguments, context =>
                 {
                     var inputModel = ApiOperation.GetInputFromContext(context, parameters[0].ParameterType);
                     var graphClient = GetGraphClient();
                     var query = graphClient.AddSelectionQuery(fieldName, inputModel, context.FieldAst.SelectionSet.Selections.OfType<Field>());
-                    if (isQuery)
+                    var graphOutput = isQuery ? graphClient.RunQueries() : graphClient.RunMutations();
+                    if (graphOutput.Errors.Any())
                     {
-                        graphClient.RunQueries();
-                    }
-                    else
-                    {
-                        graphClient.RunMutations();
+                        throw new GraphClientException(JsonConvert.SerializeObject(graphOutput.Errors));
                     }
                     var output = query.Data.ToObject(methodInfo.ReturnType);
                     if (PostOperations.ContainsKey(fieldName))

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Net.Http;
 using System.Reflection;
 using System.Web.Http;
 using GraphQL.Client;
@@ -63,7 +64,7 @@ namespace GraphQL.Server.Sample
                 //apiSchema.MapOutput<Lego, LegoMap>();
 
                 // map an operation without IOperation implementation
-                var proxy = apiSchema.Proxy<ILegoOperation>(() => new GraphClient<ILegoOperation>("http://localhost:51365/api", new System.Net.Http.HttpClient()));
+                var proxy = apiSchema.Proxy<ILegoOperation>(() => new GraphClient("http://localhost:51365/api", new HttpClient()));
                 //proxy.AddPostOperation(nameof(ILegoOperation.Lego), (context, name, value) =>
                 //{
                 //    Debug.WriteLine($"PostOperation for {name}");
