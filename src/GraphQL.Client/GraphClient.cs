@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Web;
 using CacheManager.Core;
+using GraphQL.Language.AST;
 using Newtonsoft.Json.Serialization;
 
 namespace GraphQL.Client
@@ -60,6 +61,17 @@ namespace GraphQL.Client
                 operation = string.IsNullOrEmpty(inputString) ? $"{operation}" : $"{operation}({inputString})";
             }
             var query = new GraphQuery<TOutput>(operation);
+            Queries.Add(query);
+            return query;
+        }
+        public GraphQuery<JObject> AddSelectionQuery<TInput>(string operation, TInput input, IEnumerable<Field> selections)
+        {
+            if (input != null)
+            {
+                var inputString = GetInputString(input);
+                operation = string.IsNullOrEmpty(inputString) ? $"{operation}" : $"{operation}({inputString})";
+            }
+            var query = new GraphQuery<JObject>(operation, selections);
             Queries.Add(query);
             return query;
         }

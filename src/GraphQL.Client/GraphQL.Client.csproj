@@ -34,6 +34,9 @@
     <Reference Include="CacheManager.Core, Version=1.0.1.0, Culture=neutral, PublicKeyToken=5b450b4fb65c4cdb, processorArchitecture=MSIL">
       <HintPath>..\..\packages\CacheManager.Core.1.0.1\lib\net45\CacheManager.Core.dll</HintPath>
     </Reference>
+    <Reference Include="GraphQL">
+      <HintPath>..\..\lib\GraphQL.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>

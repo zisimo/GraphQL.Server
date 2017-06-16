@@ -7,6 +7,7 @@ using GraphQL.Client;
 using GraphQL.Language.AST;
 using GraphQL.Server.Exceptions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace GraphQL.Server.Operation
 {
@@ -49,28 +50,18 @@ namespace GraphQL.Server.Operation
                 {
                     var inputModel = ApiOperation.GetInputFromContext(context, parameters[0].ParameterType);
                     var graphClient = GetGraphClient();
-                    var outputModel = GetOutputModel(context.FieldAst.SelectionSet.Selections.OfType<Field>());
-                    var output = isQuery ? graphClient.RunQuery(fieldName, inputModel, outputModel) : graphClient.RunMutation(fieldName, inputModel, outputModel);
-                    return output;
+                    var query = graphClient.AddSelectionQuery(fieldName, inputModel, context.FieldAst.SelectionSet.Selections.OfType<Field>());
+                    if (isQuery)
+                    {
+                        graphClient.RunQueries();
+                    }
+                    else
+                    {
+                        graphClient.RunMutations();
+                    }
+                    return query.Data.ToObject(methodInfo.ReturnType);
                 });
             }
-        }
-
-        private dynamic GetOutputModel(IEnumerable<Field> selections)
-        {
-            IDictionary<string, object> output = new ExpandoObject();
-            foreach (var selection in selections)
-            {
-                var name = $"{selection.Name}";
-                if (selection.Arguments.Any())
-                {
-                    var arguments = selection.Arguments.Select(a => $"{a.Name}:{JsonConvert.SerializeObject(a.Value)}");
-                    name = $"{name}({string.Join(",", arguments)})";
-                }
-                //output.Add(name, GetOutputModel(selection.SelectionSet.Selections.OfType<Field>()));
-                output[name] = GetOutputModel(selection.SelectionSet.Selections.OfType<Field>());
-            }
-            return output;
         }
     }
 }

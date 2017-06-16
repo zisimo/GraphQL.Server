@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
+using GraphQL.Language.AST;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace GraphQL.Client
@@ -9,6 +10,7 @@ namespace GraphQL.Client
     public class GraphQuery<T> : IGraphQuery
     {
         public string Operation { get; private set; }
+        public IEnumerable<Field> Selections { get; private set; }
         public T Data { get; set; }
 
         public GraphQuery(string operation)
@@ -16,9 +18,15 @@ namespace GraphQL.Client
             Operation = operation;
         }
 
+        public GraphQuery(string operation, IEnumerable<Field> selections)
+        {
+            Operation = operation;
+            Selections = selections;
+        }
+
         public string GetSelectFields()
         {
-            var output = GetFieldsForType(typeof(T));
+            var output = Selections != null && Selections.Any() ? GetFieldsForSelections(Selections) : GetFieldsForType(typeof(T));
             return output;
         }
 
@@ -28,6 +36,27 @@ namespace GraphQL.Client
             {
                 Data = obj.ToObject<T>();
             }
+        }
+
+        private string GetFieldsForSelections(IEnumerable<Field> selections)
+        {
+            var fields = new List<string>();
+            foreach (var selection in selections)
+            {
+                var name = $"{PascalCase(selection.Name)}";
+                if (selection.Arguments.Any())
+                {
+                    var arguments = selection.Arguments.Select(a => $"{PascalCase(a.Name)}:{JsonConvert.SerializeObject(a.Value)}");
+                    name = $"{name}({string.Join(",", arguments)})";
+                }
+                if (selection.SelectionSet.Children.Any())
+                {
+                    fields.Add($"{name}{GetFieldsForSelections(selection.SelectionSet.Selections.OfType<Field>())}");
+                    continue;
+                }
+                fields.Add(name);
+            }
+            return $"{{{string.Join(" ", fields)}}}";
         }
 
         private string GetFieldsForType(Type type)
