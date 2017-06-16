@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using GraphQL.Client;
 using GraphQL.Language.AST;
@@ -72,6 +73,12 @@ namespace GraphQL.Server.Operation
         public void AddPostOperation(string operationName, Func<ResolveFieldContext<object>, string, object, object> postFunction)
         {
             PostOperations[StringExtensions.PascalCase(operationName)] = postFunction;
+        }
+
+        public void AddPostOperation(Expression<Func<TInterface, string>> expression, Func<ResolveFieldContext<object>, string, object, object> postFunction)
+        {
+            var operationName = (string)(expression.Body as ConstantExpression).Value;
+            AddPostOperation(operationName, postFunction);
         }
     }
 }
