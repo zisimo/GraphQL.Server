@@ -1,28 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using GraphQL.Client;
 using GraphQL.Language.AST;
 using GraphQL.Server.Exceptions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using GraphQL.Types;
 
 namespace GraphQL.Server.Operation
 {
-    public class ProxyOperation<T> : IOperation where T : class, IOperation
+    public class ProxyOperation<TInterface> : IOperation where TInterface : class, IOperation
     {
         public string Url { get; private set; }
-        private Func<GraphClient<T>> GetGraphClient { get; set; }
+        private Func<GraphClient<TInterface>> GetGraphClient { get; set; }
+        public Dictionary<string, Func<ResolveFieldContext<object>, string, object, object>> PostOperations { get; set; }
 
-        public ProxyOperation(Func<GraphClient<T>> getGraphClient)
+        public ProxyOperation(Func<GraphClient<TInterface>> getGraphClient)
         {
             GetGraphClient = getGraphClient;
+            PostOperations = new Dictionary<string, Func<ResolveFieldContext<object>, string, object, object>>();
         }
         public void Register(ApiSchema schema)
         {
-            var methods = typeof(T).GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public);
+            var methods = typeof(TInterface).GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public);
             foreach (var methodInfo in methods)
             {
                 if (methodInfo.Name == nameof(IOperation.Register)) continue;
@@ -38,7 +38,7 @@ namespace GraphQL.Server.Operation
                 var parameters = methodInfo.GetParameters();
                 if (parameters.Length != 1)
                 {
-                    throw new GraphException($"An operation method must have one input parameter. Operation: {typeof(T).Name}.{methodInfo.Name}");
+                    throw new GraphException($"An operation method must have one input parameter. Operation: {typeof(TInterface).Name}.{methodInfo.Name}");
                 }
                 var fieldName = StringExtensions.PascalCase(methodInfo.Name);
                 var fieldDescription = "";
@@ -59,9 +59,19 @@ namespace GraphQL.Server.Operation
                     {
                         graphClient.RunMutations();
                     }
-                    return query.Data.ToObject(methodInfo.ReturnType);
+                    var output = query.Data.ToObject(methodInfo.ReturnType);
+                    if (PostOperations.ContainsKey(fieldName))
+                    {
+                        output = PostOperations[fieldName](context, fieldName, output);
+                    }
+                    return output;
                 });
             }
+        }
+
+        public void AddPostOperation(string operationName, Func<ResolveFieldContext<object>, string, object, object> postFunction)
+        {
+            PostOperations[StringExtensions.PascalCase(operationName)] = postFunction;
         }
     }
 }

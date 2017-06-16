@@ -63,7 +63,12 @@ namespace GraphQL.Server.Sample
                 //apiSchema.MapOutput<Lego, LegoMap>();
 
                 // map an operation without IOperation implementation
-                apiSchema.Proxy<ILegoOperation>(() => new GraphClient<ILegoOperation>("http://localhost:51365/api", new System.Net.Http.HttpClient()));
+                var proxy = apiSchema.Proxy<ILegoOperation>(() => new GraphClient<ILegoOperation>("http://localhost:51365/api", new System.Net.Http.HttpClient()));
+                proxy.AddPostOperation(nameof(ILegoOperation.Lego), (context, name, value) =>
+                {
+                    Debug.WriteLine($"PostOperation for {name}");
+                    return value;
+                });
 
                 apiSchema.MapAssemblies(Assembly.GetAssembly(typeof(HumanObject)));
                 apiSchema.Lock();

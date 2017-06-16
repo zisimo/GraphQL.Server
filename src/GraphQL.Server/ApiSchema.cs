@@ -115,9 +115,11 @@ namespace GraphQL.Server
             PropertyFilterManager.AddPropertyFilter(filter);
         }
 
-        public void Proxy<T>(Func<GraphClient<T>> getGraphClient) where T : class, IOperation
+        public ProxyOperation<T> Proxy<T>(Func<GraphClient<T>> getGraphClient) where T : class, IOperation
         {
-            new ProxyOperation<T>(getGraphClient).Register(this);
+            var proxy = new ProxyOperation<T>(getGraphClient);
+            proxy.Register(this);
+            return proxy;
         }
 
         public void MapOperation<TOperation>() where TOperation : IOperation
