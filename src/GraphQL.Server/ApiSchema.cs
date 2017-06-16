@@ -42,6 +42,16 @@ namespace GraphQL.Server
 
         public void MapOutput(Type outputType)
         {
+            if (typeof(GraphObjectMap<,>).IsAssignableFrom(outputType))
+            {
+                var mappedType = outputType.BaseType.GenericTypeArguments.First();
+                if (!TypeLoader.TypeLoaded(mappedType))
+                {
+                    TypeLoader.AddType(mappedType, outputType);
+                }
+                return;
+            }
+
             outputType = TypeLoader.GetBaseType(outputType, out bool isList);
             if (outputType.IsEnum || TypeLoader.TypeLoaded(outputType)) return; //Enums are loaded automatically
 
@@ -101,15 +111,13 @@ namespace GraphQL.Server
                 // Operations
                 operationTypes.AddRange(assembly.ExportedTypes.Where(t => typeof(IOperation).IsAssignableFrom(t)));
             }
+            foreach (var type in operationTypes)
+            {
+                MapOperation(type);
+            }
             foreach (var type in types)
             {
                 TypeLoader.AddType(type.BaseType.GenericTypeArguments.First(), type);
-            }
-            foreach (var type in operationTypes)
-            {
-                if (!Container.HasRegistration(type)) continue;
-                var operation = (IOperation)Container.GetInstance(type);
-                operation.Register(this);
             }
         }
 
@@ -137,7 +145,11 @@ namespace GraphQL.Server
 
         public void MapOperation<TInterface>()
         {
-            var type = typeof(TInterface);
+            MapOperation(typeof(TInterface));
+        }
+
+        public void MapOperation(Type type)
+        {
             var methods = type.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public);
             foreach (var methodInfo in methods)
             {
@@ -148,6 +160,7 @@ namespace GraphQL.Server
 
                 MapOutput(methodInfo.ReturnType);
             }
+            if (!Container.HasRegistration(type)) return;
             var instance = Container.GetInstance(type);
             if (!(instance is IOperation))
             {
