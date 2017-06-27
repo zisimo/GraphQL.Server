@@ -64,7 +64,7 @@ namespace GraphQL.Client
             Queries.Add(query);
             return query;
         }
-        public GraphQuery<JToken> AddSelectionQuery<TInput>(string operation, TInput input, IEnumerable<Field> selections)
+        public GraphQuery<JToken> AddSelectionQuery<TInput>(string operation, TInput input, IEnumerable<Field> selections) where TInput : class
         {
             if (input != null)
             {
@@ -108,14 +108,7 @@ namespace GraphQL.Client
                 return new GraphOutput<T>() { Data = query.Data, Errors = output.Errors };
             });
         }
-
-        //public void SetSecurityToken(string tenant, string certificateThumb, string validIssuerUrl, Claim[] claims = null, int validForSeconds = 120)
-        //{
-        //    if (claims == null) claims = new Claim[] { new Claim("EditSystem", "ViewSystem"), new Claim("InternalApplication", "InternalApplication") };
-        //    var token = JWTToken.Generate(CertificateStore.GetByThumbPrint(certificateThumb), null, tenant, claims, validIssuerUrl, validForSeconds);
-        //    Headers["auth"] = token;
-        //}
-
+        
         public GraphOutput RunMutations(string name = "m", object variables = null, Func<GraphOutput, DateTime> cacheUntil = null)
         {
             return Task.Run(() => RunMutationsAsync(name, variables, cacheUntil)).Result;
@@ -248,7 +241,7 @@ namespace GraphQL.Client
             return $"{JsonConvert.SerializeObject(input)}.{JsonConvert.SerializeObject(cacheHeaders)}";
         }
 
-        private Func<GraphOutput, DateTime> GetCacheUntilWrapper<T>(Func<T, DateTime> cacheUntil, GraphQuery<T> query)
+        protected Func<GraphOutput, DateTime> GetCacheUntilWrapper<T>(Func<T, DateTime> cacheUntil, GraphQuery<T> query)
         {
             Func<GraphOutput, DateTime> cacheUntilWrapper = null;
             if (cacheUntil != null) cacheUntilWrapper = o => cacheUntil(query.Data);
@@ -309,6 +302,20 @@ namespace GraphQL.Client
             var operation = MakeOperation(expression.Body, input);
             var graphOutput = RunQuery(operation, output, cacheUntil: cacheUntil);
             return HandleOutput(graphOutput);
+        }
+
+        public TOutput RunSelection<TInput, TOutput>(Expression<Func<TInterface, Func<TInput, object>>> expression, TInput input, IEnumerable<Field> selections, QueryType queryType, string name = "q", object variables = null) where TInput : class
+        {
+            var operation = MakeOperation(expression.Body, input);
+            return Task.Run(() =>
+            {
+                var query = AddSelectionQuery<TInput>(operation, null, selections);
+                var output = queryType == QueryType.Query ? RunQueriesAsync(name, variables).Result : RunMutationsAsync(name, variables).Result;
+                output.ThrowErrors();
+                var data = default(TOutput);
+                if (query.Data != null) data = query.Data.ToObject<TOutput>();
+                return data;
+            }).Result;
         }
 
         private string MakeOperation<TInput>(Expression expression, TInput input)
