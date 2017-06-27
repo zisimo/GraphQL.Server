@@ -76,9 +76,9 @@ namespace GraphQL.Client
             return query;
         }
 
-        public async Task<GraphOutput> RunMutationsAsync(string name = "m", object variables = null, Func<GraphOutput, DateTime> cacheUntil = null)
+        public Task<GraphOutput> RunMutationsAsync(string name = "m", object variables = null, Func<GraphOutput, DateTime> cacheUntil = null)
         {
-            return await Task.Run(() =>
+            return Task.Run(() =>
             {
                 return RunQueryTypeAsync("mutation", name, variables, cacheUntil).Result;
             });
@@ -90,11 +90,11 @@ namespace GraphQL.Client
                 var query = AddQuery(operation, instance);
                 var output = RunMutationsAsync(name, variables, GetCacheUntilWrapper(cacheUntil, query)).Result;
                 return new GraphOutput<T>() { Data = query.Data, Errors = output.Errors };
-            }).ConfigureAwait(false);
+            });
         }
-        public async Task<GraphOutput> RunQueriesAsync(string name = "q", object variables = null, Func<GraphOutput, DateTime> cacheUntil = null)
+        public Task<GraphOutput> RunQueriesAsync(string name = "q", object variables = null, Func<GraphOutput, DateTime> cacheUntil = null)
         {
-            return await Task.Run(() =>
+            return Task.Run(() =>
             {
                 return RunQueryTypeAsync("query", name, variables, cacheUntil).Result;
             });
