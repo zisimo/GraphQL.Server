@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
+using GraphQL.Language.AST;
 using GraphQL.Types;
 using GraphQL.Server.Security;
 
@@ -76,7 +77,8 @@ namespace GraphQL.Server
             foreach (var parameterInfo in methodInfo.GetParameters())
             {
                 if (parameterInfo.ParameterType.IsAssignableFrom(sourceType)
-                    || parameterInfo.ParameterType.IsAssignableFrom(typeof(IContainer))) continue;
+                    || parameterInfo.ParameterType.IsAssignableFrom(typeof(IContainer))
+                    || parameterInfo.ParameterType.IsAssignableFrom(typeof(IEnumerable<Field>))) continue;
                 var parameterGraphType = TypeLoader.GetGraphType(parameterInfo.ParameterType);
                 object defaultValue = null;
                 if (parameterInfo.HasDefaultValue)
@@ -113,6 +115,7 @@ namespace GraphQL.Server
             foreach (var parameterInfo in methodInfo.GetParameters())
             {
                 if (parameterInfo.ParameterType == typeof(IContainer)) arguments.Add(container);
+                else if (parameterInfo.ParameterType == typeof(IEnumerable<Field>)) arguments.Add(context.FieldAst.SelectionSet.Selections.OfType<Field>());
                 else if (parameterInfo.ParameterType.IsAssignableFrom(sourceType)) arguments.Add(context.Source);
                 else
                 {

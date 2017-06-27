@@ -55,9 +55,9 @@ namespace GraphQL.Server.Operation
                     var graphClient = GetGraphClient();
                     var query = graphClient.AddSelectionQuery(fieldName, inputModel, context.FieldAst.SelectionSet.Selections.OfType<Field>());
                     var graphOutput = isQuery ? graphClient.RunQueries() : graphClient.RunMutations();
-                    if (graphOutput.Errors.Any())
+                    if (graphOutput.HasErrors)
                     {
-                        throw new GraphClientException(JsonConvert.SerializeObject(graphOutput.Errors));
+                        graphOutput.ThrowErrors();
                     }
                     var output = query.Data.ToObject(methodInfo.ReturnType);
                     if (PostOperations.ContainsKey(fieldName))
