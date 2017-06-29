@@ -72,6 +72,8 @@ namespace GraphQL.Server
         public static TypeMapping AddType(Type type, Type graphType)
         {
             if (ExcludedTypes.Contains(graphType)) return null;
+            if (TypeMappings.ContainsKey(type.FullName)) return TypeMappings[type.FullName];
+
             var typeMapping = new TypeMapping()
             {
                 TypeName = type.FullName,
