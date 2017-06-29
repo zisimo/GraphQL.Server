@@ -55,8 +55,9 @@ namespace GraphQL.Server
         /// <param name="type"></param>
         private static void LoadChildGraphTypes(Type type)
         {
-            if (type == typeof(string) || type == typeof(DateTime)) return;
-            foreach (var propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+            var baseType = TypeLoader.GetBaseType(type, out var isList);
+            if (baseType == typeof(string) || baseType == typeof(DateTime)) return;
+            foreach (var propertyInfo in baseType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
             {
                 TypeLoader.GetGraphType(propertyInfo.PropertyType, inputType: true);
                 LoadChildGraphTypes(propertyInfo.PropertyType);
