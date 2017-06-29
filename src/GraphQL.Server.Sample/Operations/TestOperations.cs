@@ -1,6 +1,6 @@
 ﻿using GraphQL.Server.Exceptions;
 using GraphQL.Server.Operation;
-using GraphQL.Server.Sample.Objects;
+using GraphQL.Server.Sample.Maps;
 using GraphQL.Server.Sample.Repository;
 
 namespace GraphQL.Server.Sample.Operations
@@ -16,7 +16,7 @@ namespace GraphQL.Server.Sample.Operations
         public void Register(ApiSchema schema)
         {
             // Queries
-            schema.Query.AddQuery<TestObject, IdInput>(GetTest);
+            schema.Query.AddQuery<TestMap, IdInput>(GetTest);
 
             //Mutations
         }

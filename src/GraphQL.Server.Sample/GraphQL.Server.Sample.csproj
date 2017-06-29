@@ -122,7 +122,7 @@
     </Compile>
     <Compile Include="Objects\DroidObject.cs" />
     <Compile Include="Objects\EpisodesEnum.cs" />
-    <Compile Include="Objects\TestObject.cs" />
+    <Compile Include="Maps\TestMap.cs" />
     <Compile Include="Objects\HumanObject.cs" />
     <Compile Include="Objects\ICharacterInterface.cs" />
     <Compile Include="Operations\TestOperations.cs" />

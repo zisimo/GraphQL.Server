@@ -130,10 +130,21 @@ namespace GraphQL.Server
         public static void AddFields<TOutput>(IContainer container, ComplexGraphType<object> obj) where TOutput : class
         {
             var outputType = typeof(TOutput);
+            var objectType = obj.GetType();
             var filter = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
-            var methods = obj.GetType().GetMethods(filter);
+            var methods = objectType.GetMethods(filter);
+            var objectTypeProperties = objectType.GetProperties(filter);
+            foreach (var propertyInfo in objectTypeProperties)
+            {
+                if (propertyInfo.GetMethod != null && propertyInfo.GetMethod.IsPublic)
+                {
+                    AddField(container, obj, outputType, propertyInfo, methods.FirstOrDefault(m => m.Name == $"Get{propertyInfo.Name}"));
+                }
+            }
             foreach (var propertyInfo in outputType.GetProperties(filter))
             {
+                //Skip properties that are already defined in the object type
+                if (objectTypeProperties.Any(p => p.Name == propertyInfo.Name)) continue;
                 if (propertyInfo.GetMethod != null && propertyInfo.GetMethod.IsPublic)
                 {
                     AddField(container, obj, outputType, propertyInfo, methods.FirstOrDefault(m => m.Name == $"Get{propertyInfo.Name}"));
