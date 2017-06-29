@@ -40,38 +40,46 @@ namespace GraphQL.Server
             PropertyFilterManager = new PropertyFilterManager();
         }
 
-        public void MapOutput(Type outputType)
+        public void MapOutput(Type outputType, bool autoMapChildren)
         {
+            Type graphType, baseType;
             if (typeof(GraphObjectMap<,>).IsAssignableFrom(outputType))
             {
-                var mappedType = outputType.BaseType.GenericTypeArguments.First();
-                if (!TypeLoader.TypeLoaded(mappedType))
+                graphType = outputType;
+                baseType = outputType.BaseType.GenericTypeArguments.First();
+                if (!TypeLoader.TypeLoaded(baseType))
                 {
-                    TypeLoader.AddType(mappedType, outputType);
+                    TypeLoader.AddType(baseType, graphType);
                 }
-                return;
             }
-
-            outputType = TypeLoader.GetBaseType(outputType, out bool isList);
-            if (outputType.IsEnum || TypeLoader.TypeLoaded(outputType)) return; //Enums are loaded automatically
-
-            var type = typeof(GraphObjectMap<>).MakeGenericType(outputType);
-            TypeLoader.AddType(outputType, type);
-
-            var filter = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
-            foreach (var propertyInfo in outputType.GetProperties(filter))
+            else
             {
-                if (propertyInfo.GetMethod != null && propertyInfo.GetMethod.IsPublic)
+                baseType = TypeLoader.GetBaseType(outputType, out bool isList);
+                if (baseType.IsEnum || baseType.IsValueType) return;
+                if (!TypeLoader.TypeLoaded(baseType))
                 {
-                    MapOutput(propertyInfo.PropertyType);
+                    graphType = typeof(GraphObjectMap<>).MakeGenericType(baseType);
+                    TypeLoader.AddType(baseType, graphType);
+                }
+            }
+            if (autoMapChildren && baseType != typeof(string))
+            {
+                var filter = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
+                foreach (var propertyInfo in baseType.GetProperties(filter))
+                {
+                    var propertyBaseType = TypeLoader.GetBaseType(propertyInfo.PropertyType, out bool isList);
+                    if (propertyInfo.GetMethod != null && propertyInfo.GetMethod.IsPublic && propertyBaseType.FullName != baseType.FullName)
+                    {
+                        MapOutput(propertyInfo.PropertyType, autoMapChildren);
+                    }
                 }
             }
         }
 
-        public void MapOutput<TOutput>()
+        public void MapOutput<TOutput>(bool autoMapChildren)
             where TOutput : class
         {
-            MapOutput(typeof(TOutput));
+            MapOutput(typeof(TOutput), autoMapChildren);
         }
 
         public void MapOutput<TInput, TOutput>()
@@ -111,13 +119,13 @@ namespace GraphQL.Server
                 // Operations
                 operationTypes.AddRange(assembly.ExportedTypes.Where(t => typeof(IOperation).IsAssignableFrom(t)));
             }
-            foreach (var type in operationTypes)
-            {
-                MapOperation(type);
-            }
             foreach (var type in types)
             {
                 TypeLoader.AddType(type.BaseType.GenericTypeArguments.First(), type);
+            }
+            foreach (var type in operationTypes)
+            {
+                MapOperation(type);
             }
         }
 
@@ -158,7 +166,7 @@ namespace GraphQL.Server
                     methodInfo.ReturnType == typeof(void) ||
                     methodInfo.GetParameters().Length != 1) continue;
 
-                MapOutput(methodInfo.ReturnType);
+                MapOutput(methodInfo.ReturnType, true);
             }
             if (!Container.HasRegistration(type)) return;
             var instance = Container.GetInstance(type);

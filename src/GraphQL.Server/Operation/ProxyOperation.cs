@@ -47,7 +47,7 @@ namespace GraphQL.Server.Operation
                 var queryArguments = GraphArguments.FromModel(parameters[0].ParameterType).GetQueryArguments();
                 // Add function as operation
                 var returnType = TypeLoader.GetBaseType(methodInfo.ReturnType, out bool isList);
-                schema.MapOutput(returnType);
+                schema.MapOutput(returnType, autoMapChildren: true);
                 var graphType = TypeLoader.GetGraphType(methodInfo.ReturnType);
                 apiOperation.Field(graphType, fieldName, fieldDescription, queryArguments, context =>
                 {

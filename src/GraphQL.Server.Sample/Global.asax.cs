@@ -58,7 +58,7 @@ namespace GraphQL.Server.Sample
                 });
                 // map a type without GraphObject implementation
                 //apiSchema.MapOutput<Robot, Output.RobotOutput>();
-                apiSchema.MapOutput<RobotOutput>();
+                apiSchema.MapOutput<RobotOutput>(autoMapChildren: true);
 
                 // map a type with a type mapping
                 //apiSchema.MapOutput<Lego, LegoMap>();
