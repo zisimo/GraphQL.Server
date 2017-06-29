@@ -96,7 +96,11 @@ namespace GraphQL.Server
 
         public static T Extend<T>(object obj)
         {
-            return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(obj));
+            var jsonSerializerSettings = new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+            return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(obj, jsonSerializerSettings));
         }
 
         private static object FindMatchingObjectById(IEnumerable<object> sourceList, Type sourceType, object item)
