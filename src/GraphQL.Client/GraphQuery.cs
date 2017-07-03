@@ -9,6 +9,8 @@ namespace GraphQL.Client
 {
     public class GraphQuery<T> : IGraphQuery
     {
+        private Type[] _nonMapClasses = new []{typeof(string), typeof(Uri)};
+
         public string Operation { get; private set; }
         public IEnumerable<Field> Selections { get; private set; }
         public T Data { get; set; }
@@ -72,12 +74,13 @@ namespace GraphQL.Client
             foreach (var propertyInfo in type.GetProperties())
             {
                 var propertyType = propertyInfo.PropertyType;
+                if (propertyType.FullName == type.FullName) continue;
                 if (propertyType.IsArray)
                 {
                     fields.Add($"{PascalCase(propertyInfo.Name)}{GetFieldsForType(propertyType.GetElementType())}");
                     continue;
                 }
-                if (propertyType != typeof(string))
+                if (_nonMapClasses.All(c => c.FullName != propertyType.FullName))
                 {
                     if (propertyType.GetInterfaces().Any(t => t.Name.Contains("IEnumerable")))
                     {
@@ -92,7 +95,7 @@ namespace GraphQL.Client
                 }
                 fields.Add(PascalCase(propertyInfo.Name));
             }
-            return $"{{{string.Join(" ", fields)}}}";
+            return fields.Count > 0 ? $"{{{string.Join(" ", fields)}}}" : string.Empty;
         }
 
         private static string PascalCase(string text)
