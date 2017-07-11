@@ -304,14 +304,17 @@ namespace GraphQL.Client
             return HandleOutput(graphOutput);
         }
 
-        public TOutput RunSelection<TInput, TOutput>(Expression<Func<TInterface, Func<TInput, object>>> expression, TInput input, IEnumerable<Field> selections, QueryType queryType, string name = "q", object variables = null) where TInput : class
+        public TOutput RunSelection<TInput, TOutput>(Expression<Func<TInterface, Func<TInput, object>>> expression, TInput input, IEnumerable<Field> selections, QueryType queryType, string name = "q", object variables = null, bool throwErrors = true) where TInput : class
         {
             var operation = MakeOperation(expression.Body, input);
             return Task.Run(() =>
             {
                 var query = AddSelectionQuery<TInput>(operation, null, selections);
                 var output = queryType == QueryType.Query ? RunQueriesAsync(name, variables).Result : RunMutationsAsync(name, variables).Result;
-                output.ThrowErrors();
+                if (throwErrors)
+                {
+                    output.ThrowErrors();
+                }
                 var data = default(TOutput);
                 if (query.Data != null) data = query.Data.ToObject<TOutput>();
                 return data;
