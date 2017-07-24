@@ -63,6 +63,7 @@ namespace GraphQL.Client
 
         private string GetFieldsForType(Type type)
         {
+            if (_nonMapClasses.Any(c => c.FullName == type.FullName)) return string.Empty;
             if (type.IsArray) return GetFieldsForType(type.GetElementType());
             if (type != typeof(string) &&
                 type.GetInterfaces().Any(t => t.Name.Contains("IEnumerable")) &&
