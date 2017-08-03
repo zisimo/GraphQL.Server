@@ -43,8 +43,16 @@ namespace GraphQL.Server
                 contextResolve = context =>
                 {
                     AuthorizeProperty(container, authFieldName);
-                    var output = methodInfo.Invoke(obj, GetArgumentValues(methodInfo, container, context));
-                    return container.GetInstance<ApiSchema>().PropertyFilterManager.Filter(context, propertyInfo, authFieldName, output);
+                    var sourceResolverInfo = container.GetInstance<ResolverInfoManager>().Create(context);
+                    var output = methodInfo.Invoke(obj, GetArgumentValues(methodInfo, container, context, sourceResolverInfo));
+                    output = container.GetInstance<ApiSchema>().PropertyFilterManager.Filter(context, propertyInfo, authFieldName, output);
+                    if (output != null && !output.GetType().IsValueType)
+                    {
+                        var outputResolverInfo = container.GetInstance<ResolverInfoManager>().Create(context, output);
+                        outputResolverInfo.AddParents(context.Source);
+                        outputResolverInfo.AddParents(sourceResolverInfo.GetParents());
+                    }
+                    return output;
                 };
             }
             else
@@ -70,7 +78,7 @@ namespace GraphQL.Server
             //field.ResolvedType = (IGraphType)Activator.CreateInstance(graphType);
             container.GetInstance<AuthorizationMap>().AddAuthorization(type, propertyInfo);
         }
-        
+
         private static QueryArguments GetPropertyArguments(Type sourceType, MethodInfo methodInfo)
         {
             var args = new List<QueryArgument>();
@@ -78,7 +86,8 @@ namespace GraphQL.Server
             {
                 if (parameterInfo.ParameterType.IsAssignableFrom(sourceType)
                     || parameterInfo.ParameterType.IsAssignableFrom(typeof(IContainer))
-                    || parameterInfo.ParameterType.IsAssignableFrom(typeof(IEnumerable<Field>))) continue;
+                    || parameterInfo.ParameterType.IsAssignableFrom(typeof(IEnumerable<Field>))
+                    || typeof(IResolverInfo).IsAssignableFrom(parameterInfo.ParameterType)) continue;
                 var parameterGraphType = TypeLoader.GetGraphType(parameterInfo.ParameterType);
                 object defaultValue = null;
                 if (parameterInfo.HasDefaultValue)
@@ -108,7 +117,7 @@ namespace GraphQL.Server
             }
         }
 
-        private static object[] GetArgumentValues(MethodInfo methodInfo, IContainer container, ResolveFieldContext<object> context)
+        private static object[] GetArgumentValues(MethodInfo methodInfo, IContainer container, ResolveFieldContext<object> context, IResolverInfo resolverInfo)
         {
             var arguments = new List<object>();
             var sourceType = context.Source.GetType();
@@ -117,6 +126,7 @@ namespace GraphQL.Server
                 if (parameterInfo.ParameterType == typeof(IContainer)) arguments.Add(container);
                 else if (parameterInfo.ParameterType == typeof(IEnumerable<Field>)) arguments.Add(context.FieldAst.SelectionSet.Selections.OfType<Field>());
                 else if (parameterInfo.ParameterType.IsAssignableFrom(sourceType)) arguments.Add(context.Source);
+                else if (typeof(IResolverInfo).IsAssignableFrom(parameterInfo.ParameterType)) arguments.Add(resolverInfo);
                 else
                 {
                     var argName = StringExtensions.PascalCase(parameterInfo.Name);

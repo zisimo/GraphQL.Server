@@ -73,6 +73,8 @@
     <Compile Include="Operation\QueryAttribute.cs" />
     <Compile Include="PropertyFilterManager.cs" />
     <Compile Include="Operation\ProxyOperation.cs" />
+    <Compile Include="ResolverInfo.cs" />
+    <Compile Include="ResolverInfoManager.cs" />
     <Compile Include="Security\UserPermissions.cs" />
     <Compile Include="Types\UriGraphType.cs" />
     <Compile Include="Types\GraphEnum.cs" />

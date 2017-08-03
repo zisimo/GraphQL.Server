@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Web.Http;
 using GraphQL.Client;
 using GraphQL.Server.Sample.Interface.Lego;
+using GraphQL.Server.Sample.Maps;
 using GraphQL.Server.Sample.Objects;
 using GraphQL.Server.Sample.Output;
 using GraphQL.Server.Sample.Repository;
@@ -34,6 +35,7 @@ namespace GraphQL.Server.Sample
             container.Register<AuthorizationMap>(() => authorizationMap);
 
             //Graph Schema
+            container.Register<ResolverInfoManager>(Lifestyle.Scoped);
             container.RegisterSingleton<ApiSchema>(() =>
             {
                 var apiSchema = new ApiSchema(container);
@@ -62,6 +64,7 @@ namespace GraphQL.Server.Sample
 
                 // map a type with a type mapping
                 //apiSchema.MapOutput<Lego, LegoMap>();
+                apiSchema.MapAssemblies(Assembly.GetAssembly(typeof(HumanObject)));
 
                 // map an operation without IOperation implementation
                 var proxy = apiSchema.Proxy<ILegoOperation>(() => new GraphClient("http://localhost:51365/api", new HttpClient()));
@@ -75,8 +78,6 @@ namespace GraphQL.Server.Sample
                     Debug.WriteLine($"PostOperation for {name}");
                     return value;
                 });
-
-                apiSchema.MapAssemblies(Assembly.GetAssembly(typeof(HumanObject)));
                 apiSchema.Lock();
                 return apiSchema;
             });

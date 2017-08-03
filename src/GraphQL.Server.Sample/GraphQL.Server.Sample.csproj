@@ -120,6 +120,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Maps\LegoMap.cs" />
     <Compile Include="Objects\DroidObject.cs" />
     <Compile Include="Objects\EpisodesEnum.cs" />
     <Compile Include="Maps\TestMap.cs" />
