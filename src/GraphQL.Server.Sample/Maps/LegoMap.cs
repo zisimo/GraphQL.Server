@@ -9,10 +9,11 @@ namespace GraphQL.Server.Sample.Maps
         {
         }
 
-        public string GetColor(ResolverInfo<Lego> info)
+        public string GetColor(ResolverInfo info)
         {
             var test = info.GetParent<Test>();
-            return test != null ? $"TestId:{test.Id}, color:{info.Source.Color}" : info.Source.Color;
+            var source = info.GetSource<Lego>();
+            return test != null ? $"TestId:{test.Id}, color:{source.Color}" : source.Color;
         }
     }
 }

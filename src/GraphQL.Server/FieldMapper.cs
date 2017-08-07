@@ -92,7 +92,7 @@ namespace GraphQL.Server
                 if (parameterInfo.ParameterType.IsAssignableFrom(sourceType)
                     || parameterInfo.ParameterType.IsAssignableFrom(typeof(IContainer))
                     || parameterInfo.ParameterType.IsAssignableFrom(typeof(IEnumerable<Field>))
-                    || typeof(IResolverInfo).IsAssignableFrom(parameterInfo.ParameterType)) continue;
+                    || typeof(ResolverInfo).IsAssignableFrom(parameterInfo.ParameterType)) continue;
                 var parameterGraphType = TypeLoader.GetGraphType(parameterInfo.ParameterType);
                 object defaultValue = null;
                 if (parameterInfo.HasDefaultValue)
@@ -122,7 +122,7 @@ namespace GraphQL.Server
             }
         }
 
-        private static object[] GetArgumentValues(MethodInfo methodInfo, IContainer container, ResolveFieldContext<object> context, IResolverInfo resolverInfo)
+        private static object[] GetArgumentValues(MethodInfo methodInfo, IContainer container, ResolveFieldContext<object> context, ResolverInfo resolverInfo)
         {
             var arguments = new List<object>();
             var sourceType = context.Source.GetType();
@@ -131,7 +131,7 @@ namespace GraphQL.Server
                 if (parameterInfo.ParameterType == typeof(IContainer)) arguments.Add(container);
                 else if (parameterInfo.ParameterType == typeof(IEnumerable<Field>)) arguments.Add(context.FieldAst.SelectionSet.Selections.OfType<Field>());
                 else if (parameterInfo.ParameterType.IsAssignableFrom(sourceType)) arguments.Add(context.Source);
-                else if (typeof(IResolverInfo).IsAssignableFrom(parameterInfo.ParameterType)) arguments.Add(resolverInfo);
+                else if (typeof(ResolverInfo).IsAssignableFrom(parameterInfo.ParameterType)) arguments.Add(resolverInfo);
                 else
                 {
                     var argName = StringExtensions.PascalCase(parameterInfo.Name);

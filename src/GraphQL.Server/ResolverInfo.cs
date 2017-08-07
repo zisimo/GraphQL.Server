@@ -5,41 +5,29 @@ using GraphQL.Types;
 
 namespace GraphQL.Server
 {
-    public interface IResolverInfo
-    {
-        ResolveFieldContext<object> Context { get; }
-        IResolverInfo ParentResolverInfo { get; }
-        object SourceObject { get; }
-        IEnumerable<Field> Selection { get; }
-
-        object[] GetParents();
-        TParent GetParent<TParent>() where TParent : class;
-        void SetParentResolverInfo(IResolverInfo sourceResolverInfo);
-    }
-    public class ResolverInfo<TSource> : IResolverInfo where TSource : class
+    public class ResolverInfo
     {
         public ResolveFieldContext<object> Context { get; }
-        public IResolverInfo ParentResolverInfo { get; private set; }
-        public object SourceObject { get; }
-        public TSource Source => SourceObject as TSource;
+        public ResolverInfo ParentResolverInfo { get; private set; }
+        public object Source { get; }
         public IEnumerable<Field> Selection { get; private set; }
 
-        public ResolverInfo(ResolveFieldContext<object> context, TSource source)
+        public ResolverInfo(ResolveFieldContext<object> context, object source)
         {
             Context = context;
-            SourceObject = source;
+            Source = source;
             Selection = Context.FieldAst.SelectionSet.Selections.OfType<Field>();
         }
 
         public object[] GetParents()
         {
             var output = new List<object>();
-            var resolverInfo = this as IResolverInfo;
+            var resolverInfo = this;
             while (resolverInfo?.ParentResolverInfo != null && resolverInfo.ParentResolverInfo != resolverInfo)
             {
                 resolverInfo = resolverInfo.ParentResolverInfo;
-                if (resolverInfo.SourceObject == null) break;
-                output.Add(resolverInfo.SourceObject);
+                if (resolverInfo.Source == null) break;
+                output.Add(resolverInfo.Source);
             }
             return output.ToArray();
         }
@@ -47,19 +35,24 @@ namespace GraphQL.Server
         public TParent GetParent<TParent>() where TParent : class 
         {
             var parentType = typeof(TParent);
-            var resolverInfo = this as IResolverInfo;
+            var resolverInfo = this;
             while (resolverInfo?.ParentResolverInfo != null && resolverInfo.ParentResolverInfo != resolverInfo)
             {
                 resolverInfo = resolverInfo.ParentResolverInfo;
-                if (resolverInfo.SourceObject.GetType().FullName == parentType.FullName)
+                if (resolverInfo.Source.GetType().FullName == parentType.FullName)
                 {
-                    return resolverInfo.SourceObject as TParent;
+                    return resolverInfo.Source as TParent;
                 }
             }
             return null;
         }
 
-        public void SetParentResolverInfo(IResolverInfo parentResolverInfo)
+        public TSource GetSource<TSource>() where TSource : class
+        {
+            return Source as TSource;
+        }
+
+        public void SetParentResolverInfo(ResolverInfo parentResolverInfo)
         {
             ParentResolverInfo = parentResolverInfo;
         }

@@ -6,14 +6,14 @@ namespace GraphQL.Server
 {
     public class ResolverInfoManager
     {
-        private readonly Dictionary<object, IResolverInfo> _resolverInfo;
+        private readonly Dictionary<object, ResolverInfo> _resolverInfo;
 
         public ResolverInfoManager()
         {
-            _resolverInfo = new Dictionary<object, IResolverInfo>();
+            _resolverInfo = new Dictionary<object, ResolverInfo>();
         }
 
-        public IResolverInfo Create(ResolveFieldContext<object> context, object source = null)
+        public ResolverInfo Create(ResolveFieldContext<object> context, object source = null)
         {
             if (source == null)
             {
@@ -21,8 +21,7 @@ namespace GraphQL.Server
             }
             if (!_resolverInfo.ContainsKey(source))
             {
-                var resolverInfoType = typeof(ResolverInfo<>).MakeGenericType(source.GetType());
-                _resolverInfo[source] = (IResolverInfo)Activator.CreateInstance(resolverInfoType, context, source);
+                _resolverInfo[source] = (ResolverInfo)Activator.CreateInstance(typeof(ResolverInfo), context, source);
             }
             return _resolverInfo[source];
         }
