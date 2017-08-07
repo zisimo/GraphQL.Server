@@ -10,6 +10,7 @@ namespace GraphQL.Server
         ResolveFieldContext<object> Context { get; }
         IResolverInfo ParentResolverInfo { get; }
         object SourceObject { get; }
+        IEnumerable<Field> Selection { get; }
 
         object[] GetParents();
         TParent GetParent<TParent>() where TParent : class;
@@ -18,15 +19,16 @@ namespace GraphQL.Server
     public class ResolverInfo<TSource> : IResolverInfo where TSource : class
     {
         public ResolveFieldContext<object> Context { get; }
+        public IResolverInfo ParentResolverInfo { get; private set; }
         public object SourceObject { get; }
         public TSource Source => SourceObject as TSource;
-        public IResolverInfo ParentResolverInfo { get; private set; }
-        public IEnumerable<Field> Selection => Context.FieldAst.SelectionSet.Selections.OfType<Field>();
+        public IEnumerable<Field> Selection { get; private set; }
 
         public ResolverInfo(ResolveFieldContext<object> context, TSource source)
         {
             Context = context;
             SourceObject = source;
+            Selection = Context.FieldAst.SelectionSet.Selections.OfType<Field>();
         }
 
         public object[] GetParents()

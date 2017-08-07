@@ -64,6 +64,12 @@ namespace GraphQL.Server
                     var sourceProp = properties.FirstOrDefault(p => p.Name == propertyInfo.Name);
                     if (sourceProp == null) throw new ArgumentException($"No matching source property found for GraphObject. Type: {type.Name} Property: {propertyInfo.Name}");
                     var output = sourceProp.GetValue(context.Source);
+                    if (output != null && !output.GetType().IsValueType)
+                    {
+                        var sourceResolverInfo = container.GetInstance<ResolverInfoManager>().Create(context);
+                        var outputResolverInfo = container.GetInstance<ResolverInfoManager>().Create(context, output);
+                        outputResolverInfo.SetParentResolverInfo(sourceResolverInfo);
+                    }
                     return container.GetInstance<ApiSchema>().PropertyFilterManager.Filter(context, propertyInfo, authFieldName, output);
                 };
             }
