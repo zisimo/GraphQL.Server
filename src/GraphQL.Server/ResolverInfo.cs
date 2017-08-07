@@ -7,41 +7,59 @@ namespace GraphQL.Server
 {
     public interface IResolverInfo
     {
-        ResolveFieldContext<object> Context { get; set; }
+        ResolveFieldContext<object> Context { get; }
+        IResolverInfo ParentResolverInfo { get; }
+        object SourceObject { get; }
 
-        void AddParents(params object[] parents);
         object[] GetParents();
         TParent GetParent<TParent>() where TParent : class;
+        void SetParentResolverInfo(IResolverInfo sourceResolverInfo);
     }
     public class ResolverInfo<TSource> : IResolverInfo where TSource : class
     {
-        private readonly List<object> _parents;
-
-        public ResolveFieldContext<object> Context { get; set; }
-        public TSource Source { get; set; }
+        public ResolveFieldContext<object> Context { get; }
+        public object SourceObject { get; }
+        public TSource Source => SourceObject as TSource;
+        public IResolverInfo ParentResolverInfo { get; private set; }
         public IEnumerable<Field> Selection => Context.FieldAst.SelectionSet.Selections.OfType<Field>();
 
-        public ResolverInfo(TSource source)
+        public ResolverInfo(ResolveFieldContext<object> context, TSource source)
         {
-            _parents = new List<object>();
-            Source = source;
-        }
-
-        public void AddParents(params object[] parents)
-        {
-            _parents.AddRange(parents);
+            Context = context;
+            SourceObject = source;
         }
 
         public object[] GetParents()
         {
-            return _parents.ToArray();
+            var output = new List<object>();
+            var resolverInfo = this as IResolverInfo;
+            while (resolverInfo?.ParentResolverInfo != null && resolverInfo.ParentResolverInfo != resolverInfo)
+            {
+                resolverInfo = resolverInfo.ParentResolverInfo;
+                if (resolverInfo.SourceObject == null) break;
+                output.Add(resolverInfo.SourceObject);
+            }
+            return output.ToArray();
         }
 
         public TParent GetParent<TParent>() where TParent : class 
         {
             var parentType = typeof(TParent);
-            var parent = _parents.FirstOrDefault(p => p.GetType().FullName == parentType.FullName);
-            return parent as TParent;
+            var resolverInfo = this as IResolverInfo;
+            while (resolverInfo?.ParentResolverInfo != null && resolverInfo.ParentResolverInfo != resolverInfo)
+            {
+                resolverInfo = resolverInfo.ParentResolverInfo;
+                if (resolverInfo.SourceObject.GetType().FullName == parentType.FullName)
+                {
+                    return resolverInfo.SourceObject as TParent;
+                }
+            }
+            return null;
+        }
+
+        public void SetParentResolverInfo(IResolverInfo parentResolverInfo)
+        {
+            ParentResolverInfo = parentResolverInfo;
         }
     }
 }

@@ -22,11 +22,9 @@ namespace GraphQL.Server
             if (!_resolverInfo.ContainsKey(source))
             {
                 var resolverInfoType = typeof(ResolverInfo<>).MakeGenericType(source.GetType());
-                _resolverInfo[source] = (IResolverInfo)Activator.CreateInstance(resolverInfoType, source);
+                _resolverInfo[source] = (IResolverInfo)Activator.CreateInstance(resolverInfoType, context, source);
             }
-            var resolverInfo = _resolverInfo[source];
-            resolverInfo.Context = context;
-            return resolverInfo;
+            return _resolverInfo[source];
         }
     }
 }

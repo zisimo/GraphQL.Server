@@ -49,8 +49,7 @@ namespace GraphQL.Server
                     if (output != null && !output.GetType().IsValueType)
                     {
                         var outputResolverInfo = container.GetInstance<ResolverInfoManager>().Create(context, output);
-                        outputResolverInfo.AddParents(context.Source);
-                        outputResolverInfo.AddParents(sourceResolverInfo.GetParents());
+                        outputResolverInfo.SetParentResolverInfo(sourceResolverInfo);
                     }
                     return output;
                 };
