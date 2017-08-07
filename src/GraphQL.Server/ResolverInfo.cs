@@ -39,7 +39,7 @@ namespace GraphQL.Server
             while (resolverInfo?.ParentResolverInfo != null && resolverInfo.ParentResolverInfo != resolverInfo)
             {
                 resolverInfo = resolverInfo.ParentResolverInfo;
-                if (resolverInfo.Source.GetType().FullName == parentType.FullName)
+                if (parentType.IsAssignableFrom(resolverInfo.Source.GetType()))
                 {
                     return resolverInfo.Source as TParent;
                 }
