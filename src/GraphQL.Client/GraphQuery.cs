@@ -28,7 +28,7 @@ namespace GraphQL.Client
 
         public string GetSelectFields()
         {
-            var output = Selections != null && Selections.Any() ? GetFieldsForSelections(Selections) : GetFieldsForType(typeof(T));
+            var output = Selections != null ? GetFieldsForSelections(Selections) : GetFieldsForType(typeof(T));
             return output;
         }
 
@@ -58,7 +58,7 @@ namespace GraphQL.Client
                 }
                 fields.Add(name);
             }
-            return $"{{{string.Join(" ", fields)}}}";
+            return fields.Count > 0 ? $"{{{string.Join(" ", fields)}}}" : string.Empty;
         }
 
         private string GetFieldsForType(Type type)
