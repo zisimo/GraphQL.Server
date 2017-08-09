@@ -43,13 +43,12 @@ namespace GraphQL.Server
                 contextResolve = context =>
                 {
                     AuthorizeProperty(container, authFieldName);
-                    var sourceResolverInfo = container.GetInstance<ResolverInfoManager>().Create(context);
+                    var sourceResolverInfo = container.GetInstance<ResolverInfoManager>().Create(context).First();
                     var output = methodInfo.Invoke(obj, GetArgumentValues(methodInfo, container, context, sourceResolverInfo));
                     output = container.GetInstance<ApiSchema>().PropertyFilterManager.Filter(context, propertyInfo, authFieldName, output);
                     if (output != null && !output.GetType().IsValueType)
                     {
-                        var outputResolverInfo = container.GetInstance<ResolverInfoManager>().Create(context, output);
-                        outputResolverInfo.SetParentResolverInfo(sourceResolverInfo);
+                        container.GetInstance<ResolverInfoManager>().Create(context, output, sourceResolverInfo);
                     }
                     return output;
                 };
@@ -66,9 +65,8 @@ namespace GraphQL.Server
                     var output = sourceProp.GetValue(context.Source);
                     if (output != null && !output.GetType().IsValueType)
                     {
-                        var sourceResolverInfo = container.GetInstance<ResolverInfoManager>().Create(context);
-                        var outputResolverInfo = container.GetInstance<ResolverInfoManager>().Create(context, output);
-                        outputResolverInfo.SetParentResolverInfo(sourceResolverInfo);
+                        var sourceResolverInfo = container.GetInstance<ResolverInfoManager>().Create(context).First();
+                        container.GetInstance<ResolverInfoManager>().Create(context, output, sourceResolverInfo);
                     }
                     return container.GetInstance<ApiSchema>().PropertyFilterManager.Filter(context, propertyInfo, authFieldName, output);
                 };

@@ -54,7 +54,10 @@ namespace GraphQL.Server
 
         public void SetParentResolverInfo(ResolverInfo parentResolverInfo)
         {
-            ParentResolverInfo = parentResolverInfo;
+            if (parentResolverInfo != null && ParentResolverInfo == null)
+            {
+                ParentResolverInfo = parentResolverInfo;
+            }
         }
     }
 }
