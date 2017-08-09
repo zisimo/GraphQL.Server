@@ -86,6 +86,11 @@ namespace GraphQL.Server
 
         public static Type GetBaseType(Type type, out bool isList)
         {
+            if (type == null)
+            {
+                isList = false;
+                return null;
+            }
             isList = false;
             var baseType = type;
             if (baseType.IsGenericType && baseType.GetGenericTypeDefinition() == typeof(Nullable<>)) baseType = baseType.GenericTypeArguments[0];

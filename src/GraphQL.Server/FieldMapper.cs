@@ -46,7 +46,8 @@ namespace GraphQL.Server
                     var sourceResolverInfo = container.GetInstance<ResolverInfoManager>().Create(context).First();
                     var output = methodInfo.Invoke(obj, GetArgumentValues(methodInfo, container, context, sourceResolverInfo));
                     output = container.GetInstance<ApiSchema>().PropertyFilterManager.Filter(context, propertyInfo, authFieldName, output);
-                    if (output != null && !output.GetType().IsValueType)
+                    var baseType = TypeLoader.GetBaseType(output?.GetType(), out var isList);
+                    if (output != null && !baseType.IsValueType)
                     {
                         container.GetInstance<ResolverInfoManager>().Create(context, output, sourceResolverInfo);
                     }
@@ -63,7 +64,8 @@ namespace GraphQL.Server
                     var sourceProp = properties.FirstOrDefault(p => p.Name == propertyInfo.Name);
                     if (sourceProp == null) throw new ArgumentException($"No matching source property found for GraphObject. Type: {type.Name} Property: {propertyInfo.Name}");
                     var output = sourceProp.GetValue(context.Source);
-                    if (output != null && !output.GetType().IsValueType)
+                    var baseType = TypeLoader.GetBaseType(output?.GetType(), out var isList);
+                    if (output != null && !baseType.IsValueType)
                     {
                         var sourceResolverInfo = container.GetInstance<ResolverInfoManager>().Create(context).First();
                         container.GetInstance<ResolverInfoManager>().Create(context, output, sourceResolverInfo);
