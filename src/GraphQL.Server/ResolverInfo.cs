@@ -23,8 +23,10 @@ namespace GraphQL.Server
         {
             var output = new List<object>();
             var resolverInfo = this;
-            while (resolverInfo?.ParentResolverInfo != null && resolverInfo.ParentResolverInfo != resolverInfo)
+            var checkedObjects = new List<object>();
+            while (resolverInfo?.ParentResolverInfo != null && !checkedObjects.Contains(resolverInfo.Source))
             {
+                checkedObjects.Add(resolverInfo.Source);
                 resolverInfo = resolverInfo.ParentResolverInfo;
                 if (resolverInfo.Source == null) break;
                 output.Add(resolverInfo.Source);
@@ -36,8 +38,10 @@ namespace GraphQL.Server
         {
             var parentType = typeof(TParent);
             var resolverInfo = this;
-            while (resolverInfo?.ParentResolverInfo != null && resolverInfo.ParentResolverInfo != resolverInfo)
+            var checkedObjects = new List<object>();
+            while (resolverInfo?.ParentResolverInfo != null && !checkedObjects.Contains(resolverInfo.Source))
             {
+                checkedObjects.Add(resolverInfo.Source);
                 resolverInfo = resolverInfo.ParentResolverInfo;
                 if (parentType.IsAssignableFrom(resolverInfo.Source.GetType()))
                 {
@@ -50,6 +54,22 @@ namespace GraphQL.Server
         public TSource GetSource<TSource>() where TSource : class
         {
             return Source as TSource;
+        }
+
+        public TUserContext GetUserContext<TUserContext>()
+        {
+            var resolverInfo = this;
+            var checkedObjects = new List<object>();
+            while (resolverInfo?.ParentResolverInfo != null && !checkedObjects.Contains(resolverInfo.Source))
+            {
+                if (resolverInfo.Context.UserContext != null)
+                {
+                    return (TUserContext)resolverInfo.Context.UserContext;
+                }
+                checkedObjects.Add(resolverInfo.Source);
+                resolverInfo = resolverInfo.ParentResolverInfo;
+            }
+            return default(TUserContext);
         }
 
         public void SetParentResolverInfo(ResolverInfo parentResolverInfo)
