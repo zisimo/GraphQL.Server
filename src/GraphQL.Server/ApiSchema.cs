@@ -60,7 +60,8 @@ namespace GraphQL.Server
 
         public void MapOutput(Type inputType, Type outputType, bool autoMapChildren, bool overwriteMap)
         {
-            if (TypeLoader.TypeLoaded(inputType) && !overwriteMap)
+            if ((TypeLoader.TypeLoaded(inputType) && !overwriteMap) ||
+                TypeLoader.IsBasicType(inputType))
             {
                 return;
             }

@@ -118,5 +118,10 @@ namespace GraphQL.Server
         {
             return TypeLoader.BasicTypeMappings.ContainsKey(type) || TypeMappings.ContainsKey(type.FullName);
         }
+
+        public static bool IsBasicType(Type type)
+        {
+            return TypeLoader.BasicTypeMappings.ContainsKey(type);
+        }
     }
 }
