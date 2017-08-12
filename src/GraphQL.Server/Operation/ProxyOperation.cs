@@ -7,7 +7,6 @@ using GraphQL.Client;
 using GraphQL.Language.AST;
 using GraphQL.Server.Exceptions;
 using GraphQL.Types;
-using Newtonsoft.Json;
 
 namespace GraphQL.Server.Operation
 {
@@ -47,7 +46,7 @@ namespace GraphQL.Server.Operation
                 var queryArguments = GraphArguments.FromModel(parameters[0].ParameterType).GetQueryArguments();
                 // Add function as operation
                 var returnType = TypeLoader.GetBaseType(methodInfo.ReturnType, out bool isList);
-                schema.MapOutput(returnType, autoMapChildren: true);
+                schema.MapOutput(returnType, autoMapChildren: true, overwriteMap: false);
                 var graphType = TypeLoader.GetGraphType(methodInfo.ReturnType);
                 apiOperation.Field(graphType, fieldName, fieldDescription, queryArguments, context =>
                 {

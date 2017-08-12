@@ -40,62 +40,63 @@ namespace GraphQL.Server
             PropertyFilterManager = new PropertyFilterManager();
         }
 
-        public void MapOutput(Type outputType, bool autoMapChildren)
+        public void MapOutput(Type outputType, bool autoMapChildren, bool overwriteMap)
         {
             Type graphType, baseType;
             if (typeof(GraphObjectMap<,>).IsAssignableFrom(outputType))
             {
                 graphType = outputType;
                 baseType = outputType.BaseType.GenericTypeArguments.First();
-                if (!TypeLoader.TypeLoaded(baseType))
-                {
-                    TypeLoader.AddType(baseType, graphType);
-                }
+                MapOutput(baseType, graphType, autoMapChildren, overwriteMap);
             }
             else
             {
                 baseType = TypeLoader.GetBaseType(outputType, out bool isList);
                 if (baseType.IsEnum || baseType.IsValueType) return;
-                if (!TypeLoader.TypeLoaded(baseType))
-                {
-                    graphType = typeof(GraphObjectMap<>).MakeGenericType(baseType);
-                    TypeLoader.AddType(baseType, graphType);
-                }
+                graphType = typeof(GraphObjectMap<>).MakeGenericType(baseType);
+                MapOutput(baseType, graphType, autoMapChildren, overwriteMap);
             }
-            if (autoMapChildren && baseType != typeof(string))
+        }
+
+        public void MapOutput(Type inputType, Type outputType, bool autoMapChildren, bool overwriteMap)
+        {
+            if (TypeLoader.TypeLoaded(inputType) && !overwriteMap)
+            {
+                return;
+            }
+            TypeLoader.AddType(inputType, outputType);
+            if (autoMapChildren && inputType != typeof(string))
             {
                 var filter = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
-                foreach (var propertyInfo in baseType.GetProperties(filter))
+                foreach (var propertyInfo in inputType.GetProperties(filter))
                 {
                     var propertyBaseType = TypeLoader.GetBaseType(propertyInfo.PropertyType, out bool isList);
-                    if (propertyInfo.GetMethod != null && propertyInfo.GetMethod.IsPublic && propertyBaseType.FullName != baseType.FullName)
+                    if (propertyInfo.GetMethod != null && propertyInfo.GetMethod.IsPublic && propertyBaseType.FullName != inputType.FullName)
                     {
-                        MapOutput(propertyInfo.PropertyType, autoMapChildren);
+                        MapOutput(propertyInfo.PropertyType, autoMapChildren, overwriteMap);
                     }
                 }
             }
         }
 
-        public void MapOutput<TOutput>(bool autoMapChildren)
+        public void MapOutput<TOutput>(bool autoMapChildren, bool overwriteMap)
             where TOutput : class
         {
-            MapOutput(typeof(TOutput), autoMapChildren);
+            MapOutput(typeof(TOutput), autoMapChildren, overwriteMap);
         }
 
         public void MapOutput<TInput, TOutput>()
             where TInput : class
             where TOutput : class
         {
-            var type = typeof(GraphObjectMap<,>).MakeGenericType(typeof(TInput), typeof(TOutput));
-            TypeLoader.AddType(typeof(TInput), type);
+            MapOutput(typeof(TInput), typeof(TOutput), true, true);
         }
 
         public void MapOutputNamespace(Assembly assembly, string ns)
         {
             foreach (var type in assembly.ExportedTypes.Where(t => t.Namespace == ns))
             {
-                var graphType = typeof(GraphObjectMap<>).MakeGenericType(type);
-                TypeLoader.AddType(type, graphType);
+                MapOutput(type, true, true);
             }
         }
 
@@ -121,7 +122,7 @@ namespace GraphQL.Server
             }
             foreach (var type in types)
             {
-                TypeLoader.AddType(type.BaseType.GenericTypeArguments.First(), type);
+                MapOutput(type.BaseType.GenericTypeArguments.First(), type, true, false);
             }
             foreach (var type in operationTypes)
             {
@@ -166,7 +167,7 @@ namespace GraphQL.Server
                     methodInfo.ReturnType == typeof(void) ||
                     methodInfo.GetParameters().Length != 1) continue;
 
-                MapOutput(methodInfo.ReturnType, true);
+                MapOutput(methodInfo.ReturnType, true, false);
             }
             if (!Container.HasRegistration(type)) return;
             var instance = Container.GetInstance(type);

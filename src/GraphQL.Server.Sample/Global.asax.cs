@@ -58,13 +58,14 @@ namespace GraphQL.Server.Sample
                     Debug.WriteLine($"Generic property filter");
                     return value;
                 });
-                // map a type without GraphObject implementation
-                //apiSchema.MapOutput<Robot, Output.RobotOutput>();
-                apiSchema.MapOutput<RobotOutput>(autoMapChildren: true);
 
                 // map a type with a type mapping
                 //apiSchema.MapOutput<Lego, LegoMap>();
                 apiSchema.MapAssemblies(Assembly.GetAssembly(typeof(HumanObject)));
+
+                // map a type without GraphObject implementation
+                //apiSchema.MapOutput<Robot, Output.RobotOutput>();
+                apiSchema.MapOutput<RobotOutput>(autoMapChildren: true, overwriteMap: true);
 
                 // map an operation without IOperation implementation
                 var proxy = apiSchema.Proxy<ILegoOperation>(() => new GraphClient("http://localhost:51365/api", new HttpClient()));
