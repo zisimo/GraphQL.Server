@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using GraphQL.Types;
@@ -72,7 +73,10 @@ namespace GraphQL.Server
         public static TypeMapping AddType(Type type, Type graphType)
         {
             if (ExcludedTypes.Contains(graphType)) return null;
-            //if (TypeMappings.ContainsKey(type.FullName)) return TypeMappings[type.FullName];
+            if (TypeMappings.ContainsKey(type.FullName))
+            {
+                Debug.WriteLine($"Overwriting TypeMapping for type {type.FullName}");
+            }
 
             var typeMapping = new TypeMapping()
             {

@@ -42,30 +42,43 @@ namespace GraphQL.Server
 
         public void MapOutput(Type outputType, bool autoMapChildren, bool overwriteMap)
         {
+            MapOutput(outputType, autoMapChildren, overwriteMap, new List<string>());
+        }
+
+        public void MapOutput(Type inputType, Type outputType, bool autoMapChildren, bool overwriteMap)
+        {
+            MapOutput(inputType, outputType, autoMapChildren, overwriteMap, new List<string>());
+        }
+
+        private void MapOutput(Type outputType, bool autoMapChildren, bool overwriteMap, List<string> typeNamesLoaded)
+        {
             Type graphType, baseType;
             if (typeof(GraphObjectMap<,>).IsAssignableFrom(outputType))
             {
                 graphType = outputType;
                 baseType = outputType.BaseType.GenericTypeArguments.First();
-                MapOutput(baseType, graphType, autoMapChildren, overwriteMap);
+                MapOutput(baseType, graphType, autoMapChildren, overwriteMap, typeNamesLoaded);
             }
             else
             {
                 baseType = TypeLoader.GetBaseType(outputType, out bool isList);
                 if (baseType.IsEnum || baseType.IsValueType) return;
                 graphType = typeof(GraphObjectMap<>).MakeGenericType(baseType);
-                MapOutput(baseType, graphType, autoMapChildren, overwriteMap);
+                MapOutput(baseType, graphType, autoMapChildren, overwriteMap, typeNamesLoaded);
             }
         }
 
-        public void MapOutput(Type inputType, Type outputType, bool autoMapChildren, bool overwriteMap)
+        private void MapOutput(Type inputType, Type outputType, bool autoMapChildren, bool overwriteMap, List<string> typeNamesLoaded)
         {
-            if ((TypeLoader.TypeLoaded(inputType) && !overwriteMap) ||
-                TypeLoader.IsBasicType(inputType))
+            if (TypeLoader.IsBasicType(inputType) || typeNamesLoaded.Contains(inputType.FullName))
             {
                 return;
             }
-            TypeLoader.AddType(inputType, outputType);
+            if (!TypeLoader.TypeLoaded(inputType) || overwriteMap)
+            {
+                TypeLoader.AddType(inputType, outputType);
+            }
+            typeNamesLoaded.Add(inputType.FullName);
             if (autoMapChildren && inputType != typeof(string))
             {
                 var filter = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
@@ -74,7 +87,7 @@ namespace GraphQL.Server
                     var propertyBaseType = TypeLoader.GetBaseType(propertyInfo.PropertyType, out bool isList);
                     if (propertyInfo.GetMethod != null && propertyInfo.GetMethod.IsPublic && propertyBaseType.FullName != inputType.FullName)
                     {
-                        MapOutput(propertyInfo.PropertyType, autoMapChildren, overwriteMap);
+                        MapOutput(propertyInfo.PropertyType, autoMapChildren, overwriteMap, typeNamesLoaded);
                     }
                 }
             }
@@ -123,7 +136,7 @@ namespace GraphQL.Server
             }
             foreach (var type in types)
             {
-                MapOutput(type.BaseType.GenericTypeArguments.First(), type, true, false);
+                MapOutput(type.BaseType.GenericTypeArguments.First(), type, false, false);
             }
             foreach (var type in operationTypes)
             {
