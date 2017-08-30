@@ -14,7 +14,7 @@ namespace GraphQL.Server.Sample.Service.Repository
             _legos.Add(new Lego
             {
                 Color = "Blue",
-                Id = 1
+                Id = 1,
             });
             _legos.Add(new Lego
             {

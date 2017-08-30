@@ -60,7 +60,7 @@ namespace GraphQL.Server
                 contextResolve = context =>
                 {
                     AuthorizeProperty(container, authFieldName);
-                    var properties = context.Source.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
+                    var properties = context.Source.GetType().GetProperties(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public);
                     var sourceProp = properties.FirstOrDefault(p => p.Name == propertyInfo.Name);
                     if (sourceProp == null) throw new ArgumentException($"No matching source property found for GraphObject. Type: {type.Name} Property: {propertyInfo.Name}");
                     var output = sourceProp.GetValue(context.Source);
@@ -147,7 +147,7 @@ namespace GraphQL.Server
         {
             var outputType = typeof(TOutput);
             var objectType = obj.GetType();
-            var filter = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
+            var filter = BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
             var methods = objectType.GetMethods(filter);
             var objectTypeProperties = objectType.GetProperties(filter);
             foreach (var propertyInfo in objectTypeProperties)

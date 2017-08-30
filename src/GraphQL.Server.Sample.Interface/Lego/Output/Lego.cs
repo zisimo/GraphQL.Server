@@ -4,5 +4,7 @@
     {
         public int Id { get; set; }
         public string Color { get; set; }
+
+        public static string StaticColor => "Yellow";
     }
 }
