@@ -6,7 +6,6 @@ using System.Linq.Expressions;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -78,44 +77,32 @@ namespace GraphQL.Client
 
         public Task<GraphOutput> RunMutationsAsync(string name = "m", object variables = null, Func<GraphOutput, DateTime> cacheUntil = null)
         {
-            return Task.Run(() =>
-            {
-                return RunQueryTypeAsync("mutation", name, variables, cacheUntil).Result;
-            });
+            return RunQueryTypeAsync("mutation", name, variables, cacheUntil);
         }
         public async Task<GraphOutput<T>> RunMutationAsync<T>(string operation, T instance, string name = "q", object variables = null, Func<T, DateTime> cacheUntil = null)
         {
-            return await Task.Run(() =>
-            {
-                var query = AddQuery(operation, instance);
-                var output = RunMutationsAsync(name, variables, GetCacheUntilWrapper(cacheUntil, query)).Result;
-                return new GraphOutput<T>() { Data = query.Data, Errors = output.Errors };
-            });
+            var query = AddQuery(operation, instance);
+            var output = await RunMutationsAsync(name, variables, GetCacheUntilWrapper(cacheUntil, query)).ConfigureAwait(false);
+            return new GraphOutput<T> { Data = query.Data, Errors = output.Errors };
         }
         public Task<GraphOutput> RunQueriesAsync(string name = "q", object variables = null, Func<GraphOutput, DateTime> cacheUntil = null)
         {
-            return Task.Run(() =>
-            {
-                return RunQueryTypeAsync("query", name, variables, cacheUntil).Result;
-            });
+            return RunQueryTypeAsync("query", name, variables, cacheUntil);
         }
         public async Task<GraphOutput<T>> RunQueryAsync<T>(string operation, T instance, string name = "q", object variables = null, Func<T, DateTime> cacheUntil = null)
         {
-            return await Task.Run(() =>
-            {
-                var query = AddQuery(operation, instance);
-                var output = RunQueriesAsync(name, variables, GetCacheUntilWrapper(cacheUntil, query)).Result;
-                return new GraphOutput<T>() { Data = query.Data, Errors = output.Errors };
-            });
+            var query = AddQuery(operation, instance);
+            var output = await RunQueriesAsync(name, variables, GetCacheUntilWrapper(cacheUntil, query)).ConfigureAwait(false);
+            return new GraphOutput<T> { Data = query.Data, Errors = output.Errors };
         }
         
         public GraphOutput RunMutations(string name = "m", object variables = null, Func<GraphOutput, DateTime> cacheUntil = null)
         {
-            return Task.Run(() => RunMutationsAsync(name, variables, cacheUntil)).Result;
+            return RunMutationsAsync(name, variables, cacheUntil).Result;
         }
         public GraphOutput<T> RunMutation<T>(string operation, T instance, string name = "m", object variables = null, Func<T, DateTime> cacheUntil = null)
         {
-            return Task.Run(() => RunMutationAsync(operation, instance, name, variables, cacheUntil)).Result;
+            return RunMutationAsync(operation, instance, name, variables, cacheUntil).Result;
         }
         public TOutput RunMutation<TInput, TOutput>(string operation, TInput input, TOutput output, Func<TOutput, DateTime> cacheUntil = null)
         {
@@ -124,7 +111,7 @@ namespace GraphQL.Client
                 var inputString = GetInputString(input);
                 operation = string.IsNullOrEmpty(inputString) ? $"{operation}" : $"{operation}({inputString})";
             }
-            var graphOutput = Task.Run(() => RunMutationAsync(operation, output, cacheUntil: cacheUntil)).Result;
+            var graphOutput = RunMutationAsync(operation, output, cacheUntil: cacheUntil).Result;
 
             if (graphOutput.Errors.Any())
             {
@@ -135,11 +122,11 @@ namespace GraphQL.Client
 
         public GraphOutput RunQueries(string name = "q", object variables = null)
         {
-            return Task.Run(() => RunQueriesAsync(name, variables)).Result;
+            return RunQueriesAsync(name, variables).Result;
         }
         public GraphOutput<T> RunQuery<T>(string operation, T instance, string name = "q", object variables = null, Func<T, DateTime> cacheUntil = null)
         {
-            return Task.Run(() => RunQueryAsync(operation, instance, name, variables, cacheUntil)).Result;
+            return RunQueryAsync(operation, instance, name, variables, cacheUntil).Result;
         }
         public TOutput RunQuery<TInput, TOutput>(string operation, TInput input, TOutput output, Func<TOutput, DateTime> cacheUntil = null)
         {
@@ -148,7 +135,7 @@ namespace GraphQL.Client
                 var inputString = GetInputString(input);
                 operation = string.IsNullOrEmpty(inputString) ? $"{operation}" : $"{operation}({inputString})";
             }
-            var graphOutput = Task.Run(() => RunQueryAsync(operation, output, cacheUntil: cacheUntil)).Result;
+            var graphOutput = RunQueryAsync(operation, output, cacheUntil: cacheUntil).Result;
 
             if (graphOutput.Errors.Any())
             {
@@ -307,18 +294,13 @@ namespace GraphQL.Client
         public TOutput RunSelection<TInput, TOutput>(Expression<Func<TInterface, Func<TInput, object>>> expression, TInput input, IEnumerable<Field> selections, QueryType queryType, string name = "q", object variables = null, bool throwErrors = true) where TInput : class
         {
             var operation = MakeOperation(expression.Body, input);
-            return Task.Run(() =>
+            var query = AddSelectionQuery<TInput>(operation, null, selections);
+            var output = queryType == QueryType.Query ? RunQueriesAsync(name, variables).Result : RunMutationsAsync(name, variables).Result;
+            if (throwErrors)
             {
-                var query = AddSelectionQuery<TInput>(operation, null, selections);
-                var output = queryType == QueryType.Query ? RunQueriesAsync(name, variables).Result : RunMutationsAsync(name, variables).Result;
-                if (throwErrors)
-                {
-                    output.ThrowErrors();
-                }
-                var data = default(TOutput);
-                if (query.Data != null) data = query.Data.ToObject<TOutput>();
-                return data;
-            }).Result;
+                output.ThrowErrors();
+            }
+            return query.Data != null ? query.Data.ToObject<TOutput>() : default(TOutput);
         }
 
         private string MakeOperation<TInput>(Expression expression, TInput input)
