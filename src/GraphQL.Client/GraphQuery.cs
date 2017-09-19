@@ -28,7 +28,7 @@ namespace GraphQL.Client
 
         public string GetSelectFields()
         {
-            var output = Selections != null ? GetFieldsForSelections(Selections) : GetFieldsForType(typeof(T));
+            var output = Selections != null ? GetFieldsForSelections(Selections) : GetFieldsForType(typeof(T), new string[0]);
             return output;
         }
 
@@ -61,36 +61,41 @@ namespace GraphQL.Client
             return fields.Count > 0 ? $"{{{string.Join(" ", fields)}}}" : string.Empty;
         }
 
-        private string GetFieldsForType(Type type)
+        private string GetFieldsForType(Type type, string[] parentTypeNames)
         {
             if (_nonMapClasses.Any(c => c.FullName == type.FullName)) return string.Empty;
-            if (type.IsArray) return GetFieldsForType(type.GetElementType());
+            if (type.IsArray) return GetFieldsForType(type.GetElementType(), parentTypeNames);
             if (type != typeof(string) &&
                 type.GetInterfaces().Any(t => t.Name.Contains("IEnumerable")) &&
                 type.GenericTypeArguments.Length > 0)
             {
-                return GetFieldsForType(type.GenericTypeArguments[0]);
+                return GetFieldsForType(type.GenericTypeArguments[0], parentTypeNames);
             }
             var fields = new List<string>();
             foreach (var propertyInfo in type.GetProperties())
             {
                 var propertyType = propertyInfo.PropertyType;
                 if (propertyType.FullName == type.FullName) continue;
+                // Skip already processed types to prevent circular reference issues
+                if (parentTypeNames.Contains(propertyType.FullName)) continue;
+
                 if (propertyType.IsArray)
                 {
-                    fields.Add($"{PascalCase(propertyInfo.Name)}{GetFieldsForType(propertyType.GetElementType())}");
+                    fields.Add($"{PascalCase(propertyInfo.Name)}{GetFieldsForType(propertyType.GetElementType(), parentTypeNames)}");
                     continue;
                 }
                 if (_nonMapClasses.All(c => c.FullName != propertyType.FullName))
                 {
                     if (propertyType.GetInterfaces().Any(t => t.Name.Contains("IEnumerable")))
                     {
-                        fields.Add($"{PascalCase(propertyInfo.Name)}{GetFieldsForType(propertyType.GenericTypeArguments[0])}");
+                        fields.Add($"{PascalCase(propertyInfo.Name)}{GetFieldsForType(propertyType.GenericTypeArguments[0], parentTypeNames)}");
                         continue;
                     }
                     if (propertyType.IsClass || propertyType.IsInterface)
                     {
-                        fields.Add($"{PascalCase(propertyInfo.Name)}{GetFieldsForType(propertyType)}");
+                        // Add the current property type as a parent that has already been mapped
+                        var propertyParentTypeNames = new List<string>(parentTypeNames) { propertyType.FullName };
+                        fields.Add($"{PascalCase(propertyInfo.Name)}{GetFieldsForType(propertyType, propertyParentTypeNames.ToArray())}");
                         continue;
                     }
                 }
