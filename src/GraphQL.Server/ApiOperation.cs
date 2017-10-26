@@ -111,14 +111,7 @@ namespace GraphQL.Server
                 var valuesJson = JsonConvert.SerializeObject(values);
                 var inputModel = JsonConvert.DeserializeObject<TInput>(valuesJson);
                 ValidationError.ValidateObject(inputModel);
-                try
-                {
-                    return function.Invoke(inputModel, fields);
-                }
-                catch (Exception ex)
-                {
-                    throw;
-                }
+                return function.Invoke(inputModel, fields);
             });
         }
 

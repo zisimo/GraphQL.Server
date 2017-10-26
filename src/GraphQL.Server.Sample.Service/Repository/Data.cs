@@ -7,7 +7,6 @@ namespace GraphQL.Server.Sample.Service.Repository
     public class Data
     {
         private readonly List<Lego> _legos = new List<Lego>();
-        private int _idCounter;
 
         public Data()
         {

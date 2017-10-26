@@ -10,7 +10,6 @@ namespace GraphQL.Server.Sample.Repository
         private readonly List<Droid> _droids = new List<Droid>();
         private readonly List<Robot> _robots = new List<Robot>();
         private readonly List<Test> _tests = new List<Test>();
-        private int _idCounter;
 
         public Data()
         {
@@ -19,7 +18,7 @@ namespace GraphQL.Server.Sample.Repository
                 Id = 1,
                 Name = "Luke",
                 Friends = new[] { 3, 4 },
-                AppearsIn = new[] {  Episodes.NEWHOPE, Episodes.EMPIRE, Episodes.JEDI },
+                AppearsIn = new[] { Episodes.NEWHOPE, Episodes.EMPIRE, Episodes.JEDI },
                 HomePlanet = "Tatooine"
             });
             _humans.Add(new Human
