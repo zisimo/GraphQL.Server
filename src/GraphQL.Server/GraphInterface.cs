@@ -14,14 +14,14 @@ namespace GraphQL.Server
             if (container != null) FieldMapper.AddAllFields(Container, this, GetType(), true);
             ResolveType = o =>
             {
-                if (o is T) return (ObjectGraphType) Activator.CreateInstance(TypeLoader.GetGraphType(o.GetType()), Container);
+                if (o is T) return (ObjectGraphType)Activator.CreateInstance(TypeLoader.GetGraphType(o.GetType()), Container);
                 return null;
             };
         }
 
-        protected void AddType<T>() where T : ObjectGraphType
+        protected void AddType<TType>() where TType : ObjectGraphType
         {
-            var obj = (ObjectGraphType)Activator.CreateInstance(typeof(T), Container);
+            var obj = (ObjectGraphType)Activator.CreateInstance(typeof(TType), Container);
             AddPossibleType(obj);
         }
     }
