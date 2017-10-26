@@ -22,8 +22,8 @@ namespace GraphQL.Server.Sample.Operations
             // Queries
             schema.Query.AddQuery<HumanObject, IdInput>(GetHuman);
             schema.Query.AddQuery<DroidObject, IdInput>(GetDroid);
-            schema.Query.AddQuery<ICharacterInterface, IdInput>(GetHero);
-            schema.Query.AddQuery<ListGraphType<ICharacterInterface>, SearchHeroesInput>(SearchHeroes);
+            schema.Query.AddQuery<Character, IdInput>(GetHero);
+            schema.Query.AddQuery<ListGraphType<Character>, SearchHeroesInput>(SearchHeroes);
 
             //Mutations
             schema.Mutation.AddQuery<HumanObject, CreateHumanInput>(CreateHuman);

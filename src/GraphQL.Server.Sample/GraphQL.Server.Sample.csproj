@@ -125,7 +125,7 @@
     <Compile Include="Objects\EpisodesEnum.cs" />
     <Compile Include="Maps\TestMap.cs" />
     <Compile Include="Objects\HumanObject.cs" />
-    <Compile Include="Objects\ICharacterInterface.cs" />
+    <Compile Include="Objects\Character.cs" />
     <Compile Include="Operations\TestOperations.cs" />
     <Compile Include="Operations\AllOperations.cs" />
     <Compile Include="Operations\RobotOperation.cs" />
