@@ -14,7 +14,7 @@ namespace GraphQL.Server
     {
         public IContainer Container { get; private set; }
 
-        public ApiOperation Query
+        public new ApiOperation Query
         {
             get
             {
@@ -23,7 +23,7 @@ namespace GraphQL.Server
             }
         }
 
-        public ApiOperation Mutation
+        public new ApiOperation Mutation
         {
             get
             {
