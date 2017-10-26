@@ -7,11 +7,11 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Web;
 using CacheManager.Core;
 using GraphQL.Language.AST;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 
 namespace GraphQL.Client
@@ -95,7 +95,7 @@ namespace GraphQL.Client
             var output = await RunQueriesAsync(name, variables, GetCacheUntilWrapper(cacheUntil, query)).ConfigureAwait(false);
             return new GraphOutput<T> { Data = query.Data, Errors = output.Errors };
         }
-        
+
         public GraphOutput RunMutations(string name = "m", object variables = null, Func<GraphOutput, DateTime> cacheUntil = null)
         {
             return RunMutationsAsync(name, variables, cacheUntil).Result;
@@ -310,7 +310,7 @@ namespace GraphQL.Client
             var methodInfoExpression = (ConstantExpression)methodCallExpression.Object;
             var methodInfo = (MethodInfo)methodInfoExpression.Value;
 
-            var operation = PascalCase(methodInfo.Name);
+            var operation = methodInfo.Name.ToCamelCase();
 
             if (input != null)
             {
@@ -327,11 +327,6 @@ namespace GraphQL.Client
                 throw new GraphClientException(JsonConvert.SerializeObject(graphOutput.Errors));
             }
             return graphOutput.Data;
-        }
-
-        private static string PascalCase(string text)
-        {
-            return char.ToLower(text[0]) + text.Substring(1);
         }
     }
 }

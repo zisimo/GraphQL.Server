@@ -13,7 +13,7 @@ namespace GraphQL.Server
         public static InputField GetField<T>(InputField[] fields, Expression<Func<T, object>> expression)
         {
             var memberExpression = expression.Body as MemberExpression;
-            var fieldName = StringExtensions.PascalCase((memberExpression.Member as PropertyInfo).Name);
+            var fieldName = (memberExpression.Member as PropertyInfo).Name.ToCamelCase();
             return fields.FirstOrDefault(f => f.Name == fieldName);
         }
 

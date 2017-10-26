@@ -41,7 +41,7 @@ namespace GraphQL.Server.Operation
                 {
                     throw new GraphException($"An operation method must have one input parameter. Operation: {typeof(TInterface).Name}.{methodInfo.Name}");
                 }
-                var fieldName = StringExtensions.PascalCase(methodInfo.Name);
+                var fieldName = methodInfo.Name.ToCamelCase();
                 var fieldDescription = "";
                 var queryArguments = GraphArguments.FromModel(parameters[0].ParameterType).GetQueryArguments();
                 // Add function as operation
@@ -70,7 +70,7 @@ namespace GraphQL.Server.Operation
 
         public void AddPostOperation(string operationName, Func<ResolveFieldContext<object>, string, object, object> postFunction)
         {
-            PostOperations[StringExtensions.PascalCase(operationName)] = postFunction;
+            PostOperations[operationName.ToCamelCase()] = postFunction;
         }
 
         public void AddPostOperation(Expression<Func<TInterface, string>> expression, Func<ResolveFieldContext<object>, string, object, object> postFunction)

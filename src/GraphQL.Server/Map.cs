@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GraphQL.Server.Exceptions;
 using Newtonsoft.Json;
 
 namespace GraphQL.Server
@@ -24,7 +23,7 @@ namespace GraphQL.Server
             var extensionProps = extension.GetType().GetProperties();
             foreach (var field in fields)
             {
-                var propName = StringExtensions.CamelCase(field.Name);
+                var propName = field.Name.ToPascalCase();
                 var sourceProp = sourceProps.FirstOrDefault(p => p.Name == propName);
                 if (sourceProp == null && propName.EndsWith("Id"))
                 {
@@ -48,7 +47,7 @@ namespace GraphQL.Server
                     }
 
                     if (sourceProp.PropertyType.IsPrimitive) continue;
-                    if (extensionProp.PropertyType.IsEnum && typeof (string).IsAssignableFrom(sourceProp.PropertyType))
+                    if (extensionProp.PropertyType.IsEnum && typeof(string).IsAssignableFrom(sourceProp.PropertyType))
                     {
                         sourceProp.SetValue(source, extensionProp.GetValue(extension).ToString());
                         continue;

@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using GraphQL.Language.AST;
-using GraphQL.Types;
 using GraphQL.Server.Security;
+using GraphQL.Types;
 using Newtonsoft.Json;
 
 namespace GraphQL.Server
@@ -20,13 +19,13 @@ namespace GraphQL.Server
             where TOutput : class
             where TInput : class, new()
         {
-            var wrappingFunction = new Func<object, object>(input => function((TInput) input));
+            var wrappingFunction = new Func<object, object>(input => function((TInput)input));
             AddQuery(function.Method.Name, typeof(TInput), typeof(TOutput), wrappingFunction);
         }
 
         public void AddQuery(string fieldName, Type inputType, Type outputType, Func<object, object> function)
         {
-            fieldName = StringExtensions.PascalCase(fieldName);
+            fieldName = fieldName.ToCamelCase();
             var fieldDescription = "";
             var arguments = GraphArguments.FromModel(inputType);
             var queryArguments = arguments.GetQueryArguments();
@@ -36,7 +35,7 @@ namespace GraphQL.Server
             {
                 var inputModel = GetInputFromContext(context, inputType);
                 ValidationError.ValidateObject(inputModel);
-                
+
                 return function.Invoke(inputModel);
             });
         }
@@ -63,7 +62,7 @@ namespace GraphQL.Server
             where TOutputObject : GraphType
             where TInput : class, new()
         {
-            var fieldName = StringExtensions.PascalCase(function.Method.Name);
+            var fieldName = function.Method.Name.ToCamelCase();
             var authFieldName = $"{fieldName}()";
             var fieldDescription = "";
             var arguments = GraphArguments.FromModel<TInput>();

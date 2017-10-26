@@ -4,8 +4,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using GraphQL.Language.AST;
-using GraphQL.Types;
 using GraphQL.Server.Security;
+using GraphQL.Types;
 
 namespace GraphQL.Server
 {
@@ -29,7 +29,7 @@ namespace GraphQL.Server
         {
             if (propertyInfo.PropertyType == typeof(IContainer)) return;
             var fieldType = propertyInfo.PropertyType;
-            var fieldName = StringExtensions.PascalCase(propertyInfo.Name);
+            var fieldName = propertyInfo.Name.ToCamelCase();
             var fieldDescription = "";
             var authFieldName = $"{type.FullName}.{propertyInfo.Name}";
             var sourceType = type.BaseType?.GenericTypeArguments.FirstOrDefault() ?? type;
@@ -106,7 +106,7 @@ namespace GraphQL.Server
                 }
                 var argument = new QueryArgument(parameterGraphType)
                 {
-                    Name = StringExtensions.PascalCase(parameterInfo.Name),
+                    Name = parameterInfo.Name.ToCamelCase(),
                     DefaultValue = defaultValue
                 };
                 args.Add(argument);
@@ -135,7 +135,7 @@ namespace GraphQL.Server
                 else if (typeof(ResolverInfo).IsAssignableFrom(parameterInfo.ParameterType)) arguments.Add(resolverInfo);
                 else
                 {
-                    var argName = StringExtensions.PascalCase(parameterInfo.Name);
+                    var argName = parameterInfo.Name.ToCamelCase();
                     var argValue = context.Arguments.ContainsKey(argName) ? context.Arguments[argName] : null;
                     arguments.Add(argValue);
                 }
