@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Web.Http;
 using GraphQL.Client;
 using GraphQL.Server.Sample.Interface.Lego;
-using GraphQL.Server.Sample.Maps;
 using GraphQL.Server.Sample.Objects;
 using GraphQL.Server.Sample.Output;
 using GraphQL.Server.Sample.Repository;
@@ -16,6 +15,7 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using SimpleInjector;
 using SimpleInjector.Integration.WebApi;
+using SimpleInjector.Lifestyles;
 
 namespace GraphQL.Server.Sample
 {
@@ -25,7 +25,7 @@ namespace GraphQL.Server.Sample
         {
             var container = new GraphQLContainer();
             container.Options.AllowOverridingRegistrations = false;
-            container.Options.DefaultScopedLifestyle = new WebApiRequestLifestyle();
+            container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
             container.RegisterWebApiControllers(GlobalConfiguration.Configuration);
 
             container.Register<IContainer>(() => container);

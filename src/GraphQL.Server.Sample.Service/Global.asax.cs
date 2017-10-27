@@ -1,7 +1,5 @@
-﻿using System.Reflection;
-using System.Web.Http;
+﻿using System.Web.Http;
 using GraphQL.Server.Sample.Interface.Lego;
-using GraphQL.Server.Sample.Interface.Lego.Output;
 using GraphQL.Server.Sample.Service.Operations;
 using GraphQL.Server.Sample.Service.Repository;
 using GraphQL.Server.Security;
@@ -11,6 +9,7 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using SimpleInjector;
 using SimpleInjector.Integration.WebApi;
+using SimpleInjector.Lifestyles;
 using Formatting = Newtonsoft.Json.Formatting;
 
 namespace GraphQL.Server.Sample
@@ -21,7 +20,7 @@ namespace GraphQL.Server.Sample
         {
             var container = new GraphQLContainer();
             container.Options.AllowOverridingRegistrations = false;
-            container.Options.DefaultScopedLifestyle = new WebApiRequestLifestyle();
+            container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
             container.RegisterWebApiControllers(GlobalConfiguration.Configuration);
 
             container.Register<IContainer>(() => container);
