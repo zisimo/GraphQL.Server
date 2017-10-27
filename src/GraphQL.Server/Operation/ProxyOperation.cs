@@ -28,8 +28,8 @@ namespace GraphQL.Server.Operation
             {
                 if (methodInfo.Name == nameof(IOperation.Register)) continue;
 
-                var isQuery = Enumerable.Any(methodInfo.CustomAttributes, a => a.AttributeType == typeof(QueryAttribute));
-                var isMutation = Enumerable.Any(methodInfo.CustomAttributes, a => a.AttributeType == typeof(MutationAttribute));
+                var isQuery = methodInfo.CustomAttributes.Any(a => a.AttributeType == typeof(QueryAttribute));
+                var isMutation = methodInfo.CustomAttributes.Any(a => a.AttributeType == typeof(MutationAttribute));
                 if (!isQuery && !isMutation)
                 {
                     isQuery = true;
